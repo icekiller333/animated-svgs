@@ -14,7 +14,8 @@ Exports contain only CSS / SMIL animation baked inside the SVG itself — no scr
 - **Effects:** draw-on, fade, pulse, spin, bounce, slide-in, wiggle, color fade, and path morph (SMIL), with duration, delay, easing, and loop/once controls
 - **Recolor:** set fill/stroke colors on selected parts
 - **Output:** copy the animated SVG code, or download the `.svg` file
-- **Gallery:** ready-made animated SVGs to copy or download, curated by the maintainer
+- **Guided flow:** four steps — Add an SVG → Pick parts → Add motion → Export — with one control panel at a time and a live preview throughout
+- **Gallery:** curated shapes. The plain shape is the default for every item (copy or download as-is, or load it into the tool and animate it yourself); a shape with a unique/signature animation also offers that animated version
 
 ## Use it
 
@@ -22,4 +23,4 @@ Open `index.html` in a browser, or serve this repo with GitHub Pages.
 
 ## Adding to the gallery
 
-Gallery items are defined in the `GALLERY` array in `index.html` — add an entry with a title, a one-line description, and a self-contained animated SVG string, then push.
+Gallery items are defined in the `GALLERY` array in `index.html` — add an entry with a title, a one-line description, and a `shape` SVG string (the plain shape is required and is the default). If the shape has a signature animation, add `sigName` and a `sig` string with that self-contained animated version, then push.
