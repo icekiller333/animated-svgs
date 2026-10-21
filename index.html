@@ -147,6 +147,18 @@ footer{max-width:1180px;margin:0 auto;padding:0 20px 34px;color:var(--muted);fon
 .stagecard{order:1;position:static;border:0;box-shadow:none;border-radius:0;border-bottom:1px solid var(--line)}
 .panel{order:2;position:static;transform:none;left:auto;bottom:auto;width:auto;max-height:none;overflow:visible;border:0;box-shadow:none;border-radius:0;background:#fbfbfe;z-index:auto;padding:16px}
 .panel.closed .stepper,.panel.closed .panelbody{display:block}
+/* mobile: preview frozen at the top, settings scroll underneath; steps become a tab bar stuck under the preview */
+@media(max-width:760px){
+  .studio{overflow:visible}
+  .stagecard{position:sticky;top:0;z-index:30;border-radius:20px 20px 0 0;box-shadow:0 12px 24px rgba(20,20,60,.12);padding:12px}
+  .stagecard .stagehint{display:none}
+  .stage{min-height:0;padding:10px}
+  .stage svg{max-height:32vh}
+  .panel{border-radius:0 0 20px 20px}
+  .stepper{position:sticky;top:var(--stageH,290px);z-index:29;background:#fbfbfe;padding:10px 0 8px;margin-bottom:4px}
+  .stepbtn{min-width:0;flex:1 1 0;padding:8px 2px;font-size:12px;gap:5px}
+  .stepbtn .num{width:20px;height:20px;flex:0 0 20px;font-size:11px}
+}
 </style>
 </head>
 <body>
@@ -462,7 +474,37 @@ function buildString(){
   const clone=original.cloneNode(true);
   const els=clone.querySelectorAll(SEL);
   const cssParts=[],perEl={};
+  const applyToEl=(a,idx,delay)=>{
+    const el=els[idx];if(!el)return;
+    const k=kfFor(a,idx);cssParts.push(k.css);
+    if(a.preset==="draw"){
+      if(!el.getAttribute("stroke")||el.getAttribute("stroke")==="none")el.setAttribute("stroke",(info[idx].fill&&info[idx].fill!=="none")?info[idx].fill:"#191924");
+      if(!el.getAttribute("stroke-width"))el.setAttribute("stroke-width","3");
+    }
+    const sh="sf"+a.id+" "+a.dur+"s "+a.easing+" "+delay+"s "+(a.loop==="infinite"?"infinite":"1")+k.dir+(a.loop==="infinite"?"":" forwards");
+    (perEl[idx]=perEl[idx]||{anim:[],extra:[]}).anim.push(sh);
+    if(k.extra)perEl[idx].extra.push(k.extra);
+  };
   animations.forEach(a=>{
+    if(a.group){
+      if(a.preset==="draw"||a.preset==="colorfade"){
+        /* stroke/color effects can't inherit through a wrapper — apply to every member in sync, same delay, no stagger */
+        a.group.members.forEach(i=>applyToEl(a,i,a.delay));
+        return;
+      }
+      /* transform/fade effects: wrap the members in a <g> and animate the group as ONE unit —
+         transform-box: fill-box on the <g> makes the anchor the whole group's bounds */
+      const members=a.group.members.map(i=>els[i]).filter(Boolean);
+      if(members.length>1){
+        const g=document.createElementNS(SVGNS,"g");
+        members[0].parentNode.insertBefore(g,members[0]);
+        members.forEach(m=>g.appendChild(m));
+        const k=kfFor(a,a.el);cssParts.push(k.css);
+        const sh="sf"+a.id+" "+a.dur+"s "+a.easing+" "+a.delay+"s "+(a.loop==="infinite"?"infinite":"1")+k.dir+(a.loop==="infinite"?"":" forwards");
+        g.setAttribute("style","animation:"+sh+";"+k.extra);
+        return;
+      }
+    }
     const el=els[a.el];if(!el)return;
     if(a.preset==="morph"){
       if(!a.morph||!info[a.el].d)return;
@@ -473,14 +515,7 @@ function buildString(){
       else{an.setAttribute("values",info[a.el].d+";"+a.morph);an.setAttribute("fill","freeze");}
       el.appendChild(an);return;
     }
-    const k=kfFor(a,a.el);cssParts.push(k.css);
-    if(a.preset==="draw"){
-      if(!el.getAttribute("stroke")||el.getAttribute("stroke")==="none")el.setAttribute("stroke",(info[a.el].fill&&info[a.el].fill!=="none")?info[a.el].fill:"#191924");
-      if(!el.getAttribute("stroke-width"))el.setAttribute("stroke-width","3");
-    }
-    const sh="sf"+a.id+" "+a.dur+"s "+a.easing+" "+a.delay+"s "+(a.loop==="infinite"?"infinite":"1")+k.dir+(a.loop==="infinite"?"":" forwards");
-    (perEl[a.el]=perEl[a.el]||{anim:[],extra:[]}).anim.push(sh);
-    if(k.extra)perEl[a.el].extra.push(k.extra);
+    applyToEl(a,a.el,a.delay);
   });
   Object.keys(perEl).forEach(i=>{
     const el=els[i],p=perEl[i],prev=el.getAttribute("style")||"";
@@ -500,14 +535,18 @@ function updatePreview(){
   if(s)s.querySelectorAll(SEL).forEach((el,i)=>{el.setAttribute("data-part",i);el.addEventListener("click",()=>togglePart(i));});
   paintSelection();
   updateStates();
+  syncStageH();
 }
+function syncStageH(){const sc=document.querySelector(".stagecard");if(sc)document.documentElement.style.setProperty("--stageH",sc.offsetHeight+"px");}
+window.addEventListener("resize",syncStageH);
 function renderApplied(){
   const box=$("applied");box.innerHTML="";
   if(!animations.length){box.innerHTML='<p class="hint" style="margin:0">No effects yet — applied effects stack here.</p>';updateStates();return;}
   animations.forEach((a,idx)=>{
     const d=document.createElement("div");d.className="ap";
     const name=(PRESETS.find(p=>p[0]===a.preset)||[])[1]||a.preset;
-    d.innerHTML="<b>"+esc(name)+"</b><span>"+esc(info[a.el]?info[a.el].tag:"")+" #"+(a.el+1)+"</span><span style='color:var(--muted)'>"+a.dur+"s · delay "+a.delay+"s · "+(a.loop==="infinite"?"loop":"once")+"</span>";
+    const target=a.group?esc(a.group.name)+" · "+a.group.members.length+" parts as one":esc(info[a.el]?info[a.el].tag:"")+" #"+(a.el+1);
+    d.innerHTML="<b>"+esc(name)+"</b><span>"+target+"</span><span style='color:var(--muted)'>"+a.dur+"s · delay "+a.delay+"s · "+(a.loop==="infinite"?"loop":"once")+"</span>";
     if(a.preset==="draw"){
       const up=document.createElement("button");up.className="iconbtn ord";up.textContent="↑";up.title="Reveal earlier";
       up.onclick=()=>{const prev=[...animations.slice(0,idx)].reverse().find(x=>x.preset==="draw");if(prev){const t=prev.delay;prev.delay=a.delay;a.delay=t;renderApplied();updatePreview();}};
@@ -568,10 +607,18 @@ $("applyBtn").onclick=()=>{
     if(targets.some(i=>info[i].tag!=="path")){toast("Morph only works on path parts");return;}
     targets.forEach(i=>animations.push({id:++aid,el:i,preset:"morph",dur,delay:baseDelay,loop:curLoop,easing,morph:t}));
   }else{
-    targets.forEach((i,pos)=>{
-      const delay=curPreset==="draw"&&targets.length>1?+(baseDelay+pos*dur*0.85).toFixed(2):baseDelay;
+    /* a fully-selected group animates as ONE unit, not per part */
+    const covered=new Set(),bundles=[];
+    groups.forEach(g=>{if(g.members.length>1&&g.members.every(m=>selected.has(m))){bundles.push(g);g.members.forEach(m=>covered.add(m));}});
+    bundles.forEach(g=>animations.push({id:++aid,el:g.members[0],group:{name:g.name,members:[...g.members]},preset:curPreset,dur,delay:baseDelay,loop:curLoop,easing,color:$("toColor").value}));
+    const singles=targets.filter(i=>!covered.has(i));
+    singles.forEach((i,pos)=>{
+      const delay=curPreset==="draw"&&singles.length>1?+(baseDelay+pos*dur*0.85).toFixed(2):baseDelay;
       animations.push({id:++aid,el:i,preset:curPreset,dur,delay,loop:curLoop,easing,color:$("toColor").value});
     });
+    renderApplied();updatePreview();
+    toast(bundles.length?"Applied — "+bundles.map(g=>g.name).join(", ")+" move"+(bundles.length>1?"":"s")+" as one. Export is step 4.":"Applied — preview updated. Export is step 4.");
+    return;
   }
   renderApplied();updatePreview();toast("Applied — preview updated. Export is step 4.");
 };
