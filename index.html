@@ -135,6 +135,13 @@ section.viewhead p{color:var(--muted);margin:0 0 14px;font-size:14px}
 .gtoggle button{flex:1;border:0;background:transparent;font:inherit;font-size:12px;font-weight:700;padding:5px 4px;border-radius:7px;cursor:pointer;color:var(--muted)}
 .gtoggle button.on{background:#fff;color:var(--ink);box-shadow:0 1px 5px rgba(25,25,60,.14)}
 .gact{margin-top:auto;display:flex;flex-direction:column;gap:7px}
+.tagchips{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 2px}
+.tchip{border:1.5px solid var(--line);background:#fff;color:var(--ink);border-radius:999px;padding:6px 13px;font:inherit;font-size:13px;font-weight:700;cursor:pointer}
+.tchip:hover{border-color:var(--accent)}
+.tchip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.gtags{display:flex;flex-wrap:wrap;gap:6px}
+.gtag{border:0;background:var(--accent-soft);color:var(--accent-dark);border-radius:999px;padding:3px 10px;font:inherit;font-size:11.5px;font-weight:700;cursor:pointer}
+.gtag:hover{background:var(--accent);color:#fff}
 .gact .row{flex-wrap:nowrap}
 .gact .row .btn{flex:1;white-space:nowrap;padding-left:4px;padding-right:4px;font-size:12.5px}
 #toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,80px);background:var(--ink);color:#fff;font-size:14px;font-weight:600;padding:11px 18px;border-radius:999px;box-shadow:0 10px 30px rgba(0,0,0,.25);transition:transform .25s cubic-bezier(.2,1.6,.4,1);z-index:50;pointer-events:none}
@@ -304,8 +311,9 @@ footer{max-width:1180px;margin:0 auto;padding:0 20px 34px;color:var(--muted);fon
   <section id="viewGallery" hidden>
     <div class="viewhead">
       <h2>Gallery — shapes</h2>
-      <p>Every shape is free to copy or download as-is. Hit <b>Animate it</b> to load the shape into the tool and dial in any animation yourself. Shapes with a signature animation include it as a second version.</p>
+      <p>Every shape is free to copy or download as-is. Hit <b>Animate it</b> to load the shape into the tool and dial in any animation yourself. Shapes with a signature animation include it as a second version. Use the tag chips to filter the gallery.</p>
     </div>
+    <div class="tagchips" id="tagChips"></div>
     <div class="gallery" id="galleryGrid"></div>
   </section>
 </main>
@@ -651,63 +659,63 @@ $("dlBtn").onclick=()=>{const v=$("out").value;if(v){download("svg-factory.svg",
 
 /* gallery — shape is the default; a signature animation, when one exists, is a second version */
 const GALLERY=[
- {title:"Visor Helmet",desc:"Street-samurai helmet with a wraparound visor.",
+ {title:"Visor Helmet",tags:["cyberpunk", "tech", "character"],desc:"Street-samurai helmet with a wraparound visor.",
   shape:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><g fill="none" stroke="#141414" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><path d="M26 66V48a24 24 0 0 1 48 0v18"/><path d="M26 50h48v10H26z"/><path d="M33 55h16"/><path d="M20 58h6v12h-6z"/><path d="M80 58h-6v12h6z"/><path d="M50 24v-8"/><circle cx="50" cy="12" r="3.5"/><path d="M36 76h28"/></g></svg>'},
- {title:"Neon Sign",desc:"A buzzing alley sign with abstract glyph bars.",
+ {title:"Neon Sign",tags:["cyberpunk", "city"],desc:"A buzzing alley sign with abstract glyph bars.",
   shape:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><g fill="none" stroke="#141414" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 14h72"/><path d="M32 14l5 10M68 14l-5 10"/><path d="M22 24h56v42H22z"/><path d="M32 36h20M32 46h28M32 56h14"/><path d="M66 36v20"/><path d="M30 78h40"/></g></svg>'},
- {title:"Cyber Arm",desc:"Segmented prosthetic arm — street-doc special.",
+ {title:"Cyber Arm",tags:["cyberpunk", "tech"],desc:"Segmented prosthetic arm — street-doc special.",
   shape:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><g fill="none" stroke="#141414" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 38h28v19H8z"/><path d="M17 38v19M26 38v19"/><path d="M36 43h7v9h-7z"/><path d="M43 39h18a7 7 0 0 1 7 7v5H43z"/><path d="M49 51v17M57 51v20M65 51v15"/><circle cx="49" cy="72" r="2.6"/><circle cx="57" cy="75" r="2.6"/><circle cx="65" cy="70" r="2.6"/><path d="M43 47c-6 1-10 5-10 12"/></g></svg>'},
- {title:"Patrol Drone",desc:"Quad-rotor drone with a camera eye.",
+ {title:"Patrol Drone",tags:["cyberpunk", "tech", "vehicle"],desc:"Quad-rotor drone with a camera eye.",
   shape:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><g fill="none" stroke="#141414" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><path d="M38 45h24v13H38z"/><circle cx="50" cy="51.5" r="4"/><path d="M38 47L25 38M62 47l13-9M38 56l-13 8M62 56l13 8"/><path d="M14 38h22M64 38h22M14 64h22M64 64h22"/><path d="M44 58v7M56 58v7"/></g></svg>'},
- {title:"Bionic Eye",desc:"Optical implant with circuit traces.",
+ {title:"Bionic Eye",tags:["cyberpunk", "tech"],desc:"Optical implant with circuit traces.",
   shape:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><g fill="none" stroke="#141414" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 50c10-15 24-23 42-23s32 8 42 23c-10 15-24 23-42 23S18 65 8 50z"/><circle cx="50" cy="50" r="13"/><circle cx="50" cy="50" r="4.5"/><path d="M50 37V27M63 50h10M37 50H27"/><circle cx="50" cy="23" r="2.4"/><circle cx="77" cy="50" r="2.4"/><circle cx="23" cy="50" r="2.4"/></g></svg>'},
- {title:"Arcology",desc:"A self-contained tower block with a comms spike.",
+ {title:"Arcology",tags:["cyberpunk", "city"],desc:"A self-contained tower block with a comms spike.",
   shape:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><g fill="none" stroke="#141414" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><path d="M37 92V24l13-11 13 11v68"/><path d="M50 13V7"/><circle cx="50" cy="4.5" r="2.2"/><path d="M43 34h14M43 45h14M43 56h14M43 67h14"/><path d="M45 92V81h10v11"/><path d="M37 46H27v46M63 46h10v46"/><path d="M16 92h68"/></g></svg>'},
- {title:"Hooded Hacker",desc:"Hood up, respirator on, fully anonymous.",
+ {title:"Hooded Hacker",tags:["cyberpunk", "character"],desc:"Hood up, respirator on, fully anonymous.",
   shape:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><g fill="none" stroke="#141414" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><path d="M29 58V39a21 21 0 0 1 42 0v19"/><path d="M37 42a13 15 0 0 1 26 0v7a13 12 0 0 1-26 0z"/><path d="M37 47h26"/><path d="M44 55h12"/><path d="M20 91c3-13 13-19 30-19s27 6 30 19"/><circle cx="50" cy="83" r="3"/></g></svg>'},
- {title:"AI Chip",desc:"A neural processor with exposed pins.",
+ {title:"AI Chip",tags:["cyberpunk", "tech"],desc:"A neural processor with exposed pins.",
   shape:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><g fill="none" stroke="#141414" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><path d="M33 33h34v34H33z"/><path d="M43 43h14v14H43z"/><circle cx="50" cy="50" r="2.6"/><path d="M41 33V21M50 33V21M59 33V21M41 67v12M50 67v12M59 67v12M33 41H21M33 50H21M33 59H21M67 41h12M67 50h12M67 59h12"/></g></svg>'},
- {title:"Street Bike",desc:"A low-slung electric street bike.",
+ {title:"Street Bike",tags:["cyberpunk", "vehicle"],desc:"A low-slung electric street bike.",
   shape:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><g fill="none" stroke="#141414" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><circle cx="25" cy="67" r="13"/><circle cx="77" cy="67" r="13"/><circle cx="25" cy="67" r="3"/><circle cx="77" cy="67" r="3"/><path d="M25 67l17-19h17l18 19M42 48l-7 19M59 48l5-11h11"/><path d="M35 43h15"/><path d="M45 56h19l7 11H38z"/><path d="M5 84h26M45 84h18M72 84h23"/></g></svg>'},
- {title:"Cyberdeck",desc:"A hacker's deck, waveform on screen.",
+ {title:"Cyberdeck",tags:["cyberpunk", "tech"],desc:"A hacker's deck, waveform on screen.",
   shape:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><g fill="none" stroke="#141414" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><rect x="25" y="16" width="50" height="68" rx="6"/><path d="M33 26h34v25H33z"/><path d="M37 42l6-7 6 11 5-5 4 3"/><path d="M37 62h7M48 62h7M59 62h7M37 71h7M48 71h7M59 71h7"/><path d="M67 16V7"/><circle cx="67" cy="4.5" r="2.2"/></g></svg>'},
- {title:"One-Wheel Board",desc:"Central tire with footpad decks. Shape only — animate it your way.",
+ {title:"One-Wheel Board",tags:["vehicle", "object"],desc:"Central tire with footpad decks. Shape only — animate it your way.",
   shape:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 300" width="100%" height="100%"> <defs> <style> .line { fill: none; stroke: #000000; stroke-width: 10; stroke-linecap: round; stroke-linejoin: round; } </style> </defs> <!-- Central Tire --> <circle cx="300" cy="160" r="80" class="line" /> <circle cx="300" cy="160" r="30" class="line" /> <!-- Left Deck / Footpad Rail --> <path d="M 60 140 L 225 140 L 225 180 L 60 180 Z" class="line" /> <!-- Right Deck / Footpad Rail --> <path d="M 375 140 L 540 140 L 540 180 L 375 180 Z" class="line" /> <!-- Front Bumper --> <path d="M 60 180 L 60 195 L 120 195" class="line" /> <!-- Rear Bumper --> <path d="M 540 180 L 540 195 L 480 195" class="line" /> <!-- Subtle Footpad Angle Accents --> <line x1="80" y1="140" x2="220" y2="140" class="line" /> <line x1="380" y1="140" x2="520" y2="140" class="line" /> </svg>'},
- {title:"Moonshine Jug",desc:"A classic XXX jug. Shape only — animate it your way.",
+ {title:"Moonshine Jug",tags:["object"],desc:"A classic XXX jug. Shape only — animate it your way.",
   shape:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect x="43" y="5" width="14" height="10" rx="2" fill="none" stroke="#141414" stroke-width="5"/><rect x="39" y="17" width="22" height="8" rx="3" fill="none" stroke="#141414" stroke-width="5"/><path d="M41 25c0 7-3 11-7 17-9 12-13 22-11 36 1 10 8 17 27 17s26-7 27-17c2-14-2-24-11-36-4-6-7-10-7-17" fill="none" stroke="#141414" stroke-width="5" stroke-linecap="round"/><path d="M61 34c13-3 23 6 22 17-1 10-10 16-19 13 5-8 4-22-3-30z" fill="none" stroke="#141414" stroke-width="5" stroke-linejoin="round"/><path d="M35 72l8 10M43 72l-8 10M47 72l8 10M55 72l-8 10M59 72l8 10M67 72l-8 10" stroke="#141414" stroke-width="4" stroke-linecap="round"/></svg>'},
- {title:"Palm Tree",desc:"A leaning palm with coconuts.",
+ {title:"Palm Tree",tags:["nature"],desc:"A leaning palm with coconuts.",
   shape:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M55 45C44 31 30 27 18 33M55 45c-12-2-24 1-31 9M55 45c-1-13 4-23 13-28M55 45c8-16 22-21 33-16M55 45c13-3 25 1 31 9" fill="none" stroke="#141414" stroke-width="5" stroke-linecap="round"/><circle cx="48" cy="50" r="4.5" fill="none" stroke="#141414" stroke-width="4.5"/><circle cx="62" cy="50" r="4.5" fill="none" stroke="#141414" stroke-width="4.5"/><path d="M43 95c1-16 4-31 9-44M57 95c0-15-1-29-3-42M44 82c3 2 8 2 12 0M46 68c3 2 7 2 10 0M22 95h56" fill="none" stroke="#141414" stroke-width="5" stroke-linecap="round"/></svg>',
   sigName:"Sway",
   sig:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><style>.sw{transform-box:fill-box;transform-origin:50% 100%;animation:sw 3.6s ease-in-out infinite}@keyframes sw{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(2.6deg)}}</style><g class="sw"><path d="M55 45C44 31 30 27 18 33M55 45c-12-2-24 1-31 9M55 45c-1-13 4-23 13-28M55 45c8-16 22-21 33-16M55 45c13-3 25 1 31 9" fill="none" stroke="#141414" stroke-width="5" stroke-linecap="round"/><circle cx="48" cy="50" r="4.5" fill="none" stroke="#141414" stroke-width="4.5"/><circle cx="62" cy="50" r="4.5" fill="none" stroke="#141414" stroke-width="4.5"/><path d="M43 95c1-16 4-31 9-44M57 95c0-15-1-29-3-42M44 82c3 2 8 2 12 0M46 68c3 2 7 2 10 0M22 95h56" fill="none" stroke="#141414" stroke-width="5" stroke-linecap="round"/></g></svg>'},
- {title:"Check Mark",desc:"A bold check inside a ring.",
+ {title:"Check Mark",tags:["ui", "symbol"],desc:"A bold check inside a ring.",
   shape:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M50 6 A44 44 0 1 1 49.9 6" fill="none" stroke="#141414" stroke-width="6" stroke-linecap="round"/><path d="M32 52l13 13 24-29" fill="none" stroke="#141414" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
   sigName:"Draw-on",
   sig:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><style>.r{stroke-dasharray:277;stroke-dashoffset:277;animation:d 3s ease-in-out infinite}@keyframes d{0%{stroke-dashoffset:277}55%,100%{stroke-dashoffset:0}}.t{stroke-dasharray:62;stroke-dashoffset:62;animation:t 3s ease-in-out infinite}@keyframes t{0%,50%{stroke-dashoffset:62}80%,100%{stroke-dashoffset:0}}</style><path class="r" d="M50 6 A44 44 0 1 1 49.9 6" fill="none" stroke="#141414" stroke-width="6" stroke-linecap="round"/><path class="t" d="M32 52l13 13 24-29" fill="none" stroke="#141414" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>'},
- {title:"Heart",desc:"A classic heart outline.",
+ {title:"Heart",tags:["ui", "symbol"],desc:"A classic heart outline.",
   shape:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M50 84C20 62 12 44 12 31 12 17 23 8 35 8c7 0 12 3 15 8 3-5 8-8 15-8 12 0 23 9 23 23 0 13-8 31-38 53z" fill="none" stroke="#141414" stroke-width="5" stroke-linejoin="round"/></svg>',
   sigName:"Pulse",
   sig:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><style>.h{transform-box:fill-box;transform-origin:center;animation:p 1.2s ease-in-out infinite}@keyframes p{0%,100%{transform:scale(1)}30%{transform:scale(1.14)}45%{transform:scale(1.05)}}</style><path class="h" d="M50 84C20 62 12 44 12 31 12 17 23 8 35 8c7 0 12 3 15 8 3-5 8-8 15-8 12 0 23 9 23 23 0 13-8 31-38 53z" fill="none" stroke="#141414" stroke-width="5" stroke-linejoin="round"/></svg>'},
- {title:"Star",desc:"A five-point star outline.",
+ {title:"Star",tags:["ui", "symbol"],desc:"A five-point star outline.",
   shape:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><polygon points="50,6 61,38 95,38 67,57 77,90 50,70 23,90 33,57 5,38 39,38" fill="none" stroke="#141414" stroke-width="4.5" stroke-linejoin="round"/></svg>',
   sigName:"Spin",
   sig:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><style>.s{transform-box:fill-box;transform-origin:center;animation:r 6s linear infinite}@keyframes r{to{transform:rotate(360deg)}}</style><polygon class="s" points="50,6 61,38 95,38 67,57 77,90 50,70 23,90 33,57 5,38 39,38" fill="none" stroke="#141414" stroke-width="4.5" stroke-linejoin="round"/></svg>'},
- {title:"Down Arrow",desc:"A scroll-this-way arrow.",
+ {title:"Down Arrow",tags:["ui", "symbol"],desc:"A scroll-this-way arrow.",
   shape:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M50 14v52" stroke="#141414" stroke-width="6" stroke-linecap="round"/><path d="M26 46l24 26 24-26" fill="none" stroke="#141414" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
   sigName:"Bounce",
   sig:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><style>.a{animation:b 1.4s ease-in-out infinite}@keyframes b{0%,100%{transform:translateY(0)}50%{transform:translateY(14px)}}</style><g class="a"><path d="M50 14v52" stroke="#141414" stroke-width="6" stroke-linecap="round"/><path d="M26 46l24 26 24-26" fill="none" stroke="#141414" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></g></svg>'},
- {title:"Bell",desc:"A notification bell outline.",
+ {title:"Bell",tags:["ui", "symbol"],desc:"A notification bell outline.",
   shape:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M50 10a8 8 0 0 1 8 8c10 4 14 12 14 24 0 10 3 14 6 18H22c3-4 6-8 6-18 0-12 4-20 14-24a8 8 0 0 1 8-8z" fill="none" stroke="#141414" stroke-width="5" stroke-linejoin="round"/><circle cx="50" cy="70" r="8" fill="none" stroke="#141414" stroke-width="5"/></svg>',
   sigName:"Wiggle",
   sig:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><style>.b{transform-box:fill-box;transform-origin:50% 8%;animation:w 2.2s ease-in-out infinite}@keyframes w{0%,55%,100%{transform:rotate(0)}60%{transform:rotate(-11deg)}70%{transform:rotate(9deg)}80%{transform:rotate(-5deg)}90%{transform:rotate(3deg)}}</style><g class="b"><path d="M50 10a8 8 0 0 1 8 8c10 4 14 12 14 24 0 10 3 14 6 18H22c3-4 6-8 6-18 0-12 4-20 14-24a8 8 0 0 1 8-8z" fill="none" stroke="#141414" stroke-width="5" stroke-linejoin="round"/><circle cx="50" cy="70" r="8" fill="none" stroke="#141414" stroke-width="5"/></g></svg>'},
- {title:"Sun",desc:"A sun with eight rays.",
+ {title:"Sun",tags:["nature", "symbol"],desc:"A sun with eight rays.",
   shape:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><g stroke="#141414" stroke-width="5" stroke-linecap="round"><line x1="50" y1="4" x2="50" y2="14"/><line x1="50" y1="86" x2="50" y2="96"/><line x1="4" y1="50" x2="14" y2="50"/><line x1="86" y1="50" x2="96" y2="50"/><line x1="18" y1="18" x2="25" y2="25"/><line x1="75" y1="75" x2="82" y2="82"/><line x1="82" y1="18" x2="75" y2="25"/><line x1="25" y1="75" x2="18" y2="82"/></g><circle cx="50" cy="50" r="21" fill="none" stroke="#141414" stroke-width="5"/></svg>',
   sigName:"Color fade",
   sig:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><style>.c{animation:f 3s ease-in-out infinite alternate}@keyframes f{from{stroke:#141414}to{stroke:#ff8c1a}}</style><g class="c" stroke="#141414" stroke-width="5" stroke-linecap="round"><line x1="50" y1="4" x2="50" y2="14"/><line x1="50" y1="86" x2="50" y2="96"/><line x1="4" y1="50" x2="14" y2="50"/><line x1="86" y1="50" x2="96" y2="50"/><line x1="18" y1="18" x2="25" y2="25"/><line x1="75" y1="75" x2="82" y2="82"/><line x1="82" y1="18" x2="75" y2="25"/><line x1="25" y1="75" x2="18" y2="82"/></g><circle class="c" cx="50" cy="50" r="21" fill="none" stroke="#141414" stroke-width="5"/></svg>'},
- {title:"Blob",desc:"A round organic blob, ready to morph.",
+ {title:"Blob",tags:["character", "creature"],desc:"A round organic blob, ready to morph.",
   shape:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M50 5 C70 5 95 25 95 50 C95 75 70 95 50 95 C30 95 5 75 5 50 C5 25 30 5 50 5 Z" fill="none" stroke="#141414" stroke-width="5"/></svg>',
   sigName:"Morph",
   sig:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M50 5 C70 5 95 25 95 50 C95 75 70 95 50 95 C30 95 5 75 5 50 C5 25 30 5 50 5 Z" fill="none" stroke="#141414" stroke-width="5"><animate attributeName="d" dur="4s" repeatCount="indefinite" values="M50 5 C70 5 95 25 95 50 C95 75 70 95 50 95 C30 95 5 75 5 50 C5 25 30 5 50 5 Z;M50 12 C86 2 92 30 88 52 C84 74 72 88 48 90 C24 92 10 76 12 50 C14 24 22 16 50 12 Z;M50 5 C70 5 95 25 95 50 C95 75 70 95 50 95 C30 95 5 75 5 50 C5 25 30 5 50 5 Z"/></path></svg>'},
- {title:"Equalizer Bars",desc:"Three audio / loading bars, outlined.",
+ {title:"Equalizer Bars",tags:["ui", "music"],desc:"Three audio / loading bars, outlined.",
   shape:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect x="16" y="22" width="16" height="62" rx="5" fill="none" stroke="#141414" stroke-width="4.5"/><rect x="42" y="22" width="16" height="62" rx="5" fill="none" stroke="#141414" stroke-width="4.5"/><rect x="68" y="22" width="16" height="62" rx="5" fill="none" stroke="#141414" stroke-width="4.5"/></svg>',
   sigName:"Equalize",
   sig:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><style>.e{transform-box:fill-box;transform-origin:50% 100%;animation:q 1s ease-in-out infinite}.e2{animation-delay:.18s}.e3{animation-delay:.36s}@keyframes q{0%,100%{transform:scaleY(.35)}50%{transform:scaleY(1)}}</style><rect class="e" x="16" y="22" width="16" height="62" rx="5" fill="none" stroke="#141414" stroke-width="4.5"/><rect class="e e2" x="42" y="22" width="16" height="62" rx="5" fill="none" stroke="#141414" stroke-width="4.5"/><rect class="e e3" x="68" y="22" width="16" height="62" rx="5" fill="none" stroke="#141414" stroke-width="4.5"/></svg>'}
@@ -718,17 +726,38 @@ GALLERY.forEach((g,i)=>{
   let toggle="";
   if(g.sig)toggle='<div class="gtoggle"><button data-mode="shape" class="on">Shape</button><button data-mode="sig">'+esc(g.sigName)+'</button></div>';
   card.innerHTML='<div class="gprev">'+g.shape+'</div><div class="gbody"><h3>'+esc(g.title)+'</h3><p>'+esc(g.desc)+'</p>'
+   +'<div class="gtags">'+(g.tags||[]).map(t=>'<button class="gtag" data-tag="'+t+'">'+t+'</button>').join("")+'</div>'
    +toggle
    +'<div class="gact"><button class="btn primary" data-animate="'+i+'">Animate it →</button>'
    +'<div class="row"><button class="btn" data-copy="'+i+'">Copy shape</button><button class="btn" data-dl="'+i+'">Download shape</button></div></div></div>';
   grid.appendChild(card);
 });
+/* tag filtering */
+const chipsBox=$("tagChips");
+const allTags=[...new Set(GALLERY.flatMap(g=>g.tags||[]))].sort();
+let curTag="all";
+function applyTagFilter(){
+  document.querySelectorAll(".gcard").forEach((card,i)=>{
+    const g=GALLERY[i];
+    card.style.display=(curTag==="all"||(g.tags||[]).includes(curTag))?"":"none";
+  });
+}
+function renderChips(){
+  chipsBox.innerHTML="";
+  const mk=(tag,label,count)=>{const b=document.createElement("button");b.className="tchip"+(curTag===tag?" on":"");b.textContent=label+" · "+count;b.onclick=()=>{curTag=tag;renderChips();applyTagFilter();};chipsBox.appendChild(b);};
+  mk("all","All",GALLERY.length);
+  allTags.forEach(t=>mk(t,t,GALLERY.filter(g=>(g.tags||[]).includes(t)).length));
+}
+function setTag(t){curTag=t;renderChips();applyTagFilter();}
+renderChips();
 function cardVersion(card){
   const g=GALLERY[+card.querySelector("[data-copy]").dataset.copy];
   return card.dataset.mode==="sig"&&g.sig?g.sig:g.shape;
 }
 grid.addEventListener("click",e=>{
   const card=e.target.closest(".gcard");if(!card)return;
+  const tg=e.target.closest("[data-tag]");
+  if(tg){setTag(tg.dataset.tag);chipsBox.scrollIntoView({behavior:"smooth",block:"start"});return;}
   const tog=e.target.closest("button[data-mode]");
   if(tog){
     card.dataset.mode=tog.dataset.mode;
