@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SVG Factory — Animate any SVG</title>
+<meta name="description" content="SVG Factory: paste or upload an SVG, add animations with clicks, copy or download a self-contained animated SVG that works anywhere.">
+<style>
+:root{
+  --bg:#f4f4fb; --card:#ffffff; --ink:#191924; --muted:#6b6b7e; --line:#e4e4f0;
+  --accent:#6c4dff; --accent2:#ff5c8a; --good:#0da678; --radius:16px;
+  --shadow:0 2px 10px rgba(25,25,60,.06),0 12px 32px rgba(25,25,60,.06);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:ui-rounded,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink)}
+a{color:var(--accent)}
+header{max-width:1180px;margin:0 auto;padding:28px 20px 6px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.logo{width:52px;height:52px;flex:0 0 auto}
+.logo svg{width:100%;height:100%}
+h1{font-size:30px;margin:0;letter-spacing:-.5px}
+.tag{color:var(--muted);font-size:15px;margin:2px 0 0}
+header nav{margin-left:auto;display:flex;gap:8px}
+header nav a{text-decoration:none;font-weight:600;font-size:14px;color:var(--ink);background:var(--card);border:1px solid var(--line);padding:9px 14px;border-radius:999px;transition:transform .15s,box-shadow .15s}
+header nav a:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+main{max-width:1180px;margin:0 auto;padding:14px 20px 40px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
+.card h2{font-size:16px;margin:0 0 4px;display:flex;align-items:center;gap:9px}
+.step{width:24px;height:24px;border-radius:8px;background:var(--accent);color:#fff;font-size:13px;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto}
+.hint{color:var(--muted);font-size:13px;margin:0 0 12px}
+textarea{width:100%;min-height:120px;border:1px solid var(--line);border-radius:12px;padding:10px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;resize:vertical;background:#fbfbfe}
+textarea:focus,input:focus,select:focus{outline:2px solid var(--accent);outline-offset:1px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{appearance:none;border:1px solid var(--line);background:#fff;color:var(--ink);font:inherit;font-weight:600;font-size:13.5px;padding:9px 13px;border-radius:11px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:transform .13s,box-shadow .13s,background .13s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(25,25,60,.12)}
+.btn:active{transform:translateY(0) scale(.97)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.pink{background:var(--accent2);border-color:var(--accent2);color:#fff}
+.btn svg{width:16px;height:16px;flex:0 0 auto}
+.btn[disabled]{opacity:.45;pointer-events:none}
+.drop{border:1.5px dashed #c9c9e4;border-radius:12px;padding:12px;text-align:center;color:var(--muted);font-size:13px;margin-top:10px;transition:border-color .15s,background .15s}
+.drop.over{border-color:var(--accent);background:#f0edff;color:var(--ink)}
+.stage{background:repeating-conic-gradient(#f0f0f7 0% 25%,#fafaff 0% 50%) 50%/22px 22px;border:1px solid var(--line);border-radius:12px;min-height:280px;display:flex;align-items:center;justify-content:center;padding:18px;overflow:hidden}
+.stage svg{max-width:100%;max-height:320px;width:auto;height:auto}
+.stage .empty{color:var(--muted);font-size:14px;text-align:center;padding:30px 10px}
+.els{display:flex;flex-direction:column;gap:6px;max-height:264px;overflow:auto}
+.el{display:flex;align-items:center;gap:9px;border:1px solid var(--line);border-radius:10px;padding:7px 10px;cursor:pointer;font-size:13px;background:#fff;transition:border-color .12s,background .12s,transform .12s;text-align:left;width:100%;font:inherit}
+.el:hover{transform:translateX(2px)}
+.el.sel{border-color:var(--accent);background:#f0edff}
+.el .tag{font-family:ui-monospace,Menlo,monospace;font-weight:700;font-size:12px;background:#eeeef7;border-radius:6px;padding:2px 7px}
+.el .meta{color:var(--muted);font-size:12px;margin-left:auto;white-space:nowrap}
+.dot{width:12px;height:12px;border-radius:50%;border:1px solid rgba(0,0,0,.18);flex:0 0 auto}
+.presets{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.preset{border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px 6px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;font:inherit;font-size:12px;font-weight:600;color:var(--ink);transition:transform .13s,border-color .13s,background .13s}
+.preset:hover{transform:translateY(-2px)}
+.preset.on{border-color:var(--accent);background:#f0edff;color:var(--accent)}
+.preset svg{width:22px;height:22px}
+.ctl{margin:10px 0}
+.ctl label{display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:5px}
+.ctl label output{color:var(--accent);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--accent)}
+select{border:1px solid var(--line);border-radius:10px;padding:8px;font:inherit;font-size:13.5px;background:#fff}
+input[type=color]{width:44px;height:36px;border:1px solid var(--line);border-radius:10px;background:#fff;padding:2px;cursor:pointer}
+input[type=text]{border:1px solid var(--line);border-radius:10px;padding:8px 10px;font:inherit;font-size:13.5px}
+.switch{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.switch button{border:0;background:#fff;font:inherit;font-size:13px;font-weight:600;padding:8px 14px;cursor:pointer}
+.switch button.on{background:var(--accent);color:#fff}
+.applied{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.ap{display:flex;align-items:center;gap:8px;font-size:13px;border:1px solid var(--line);border-radius:10px;padding:7px 10px;background:#fbfbfe}
+.ap b{text-transform:capitalize}
+.ap .x{margin-left:auto}
+.iconbtn{border:0;background:transparent;cursor:pointer;font-size:14px;padding:3px 6px;border-radius:7px;color:var(--muted)}
+.iconbtn:hover{background:#eeeef7;color:var(--ink)}
+.out{grid-column:1/-1}
+.outbox{width:100%;min-height:110px}
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:16px;margin-top:6px}
+.gcard{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;transition:transform .15s,box-shadow .15s}
+.gcard:hover{transform:translateY(-4px);box-shadow:0 4px 14px rgba(25,25,60,.08),0 18px 40px rgba(25,25,60,.12)}
+.gprev{height:150px;display:flex;align-items:center;justify-content:center;background:repeating-conic-gradient(#f0f0f7 0% 25%,#fafaff 0% 50%) 50%/20px 20px;border-bottom:1px solid var(--line)}
+.gprev svg{width:104px;height:104px}
+.gbody{padding:12px 14px 14px}
+.gbody h3{margin:0 0 2px;font-size:14.5px}
+.gbody p{margin:0 0 10px;color:var(--muted);font-size:12.5px}
+section h2.sec{font-size:21px;margin:30px 0 4px;letter-spacing:-.3px}
+section p.sub{color:var(--muted);margin:0 0 14px;font-size:14px}
+#toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,80px);background:var(--ink);color:#fff;font-size:14px;font-weight:600;padding:11px 18px;border-radius:999px;box-shadow:0 10px 30px rgba(0,0,0,.25);transition:transform .25s cubic-bezier(.2,1.6,.4,1);z-index:50;pointer-events:none}
+#toast.show{transform:translate(-50%,0)}
+.err{color:#c2255c;font-size:13px;min-height:18px;margin-top:8px}
+footer{max-width:1180px;margin:0 auto;padding:0 20px 34px;color:var(--muted);font-size:13px}
+.kbd{font-family:ui-monospace,Menlo,monospace;background:#eeeef7;border-radius:5px;padding:1px 6px;font-size:12px}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo" aria-hidden="true">
+    <svg viewBox="0 0 64 64" fill="none"><rect x="6" y="26" width="52" height="32" rx="6" fill="#6c4dff"/><rect x="14" y="14" width="8" height="14" fill="#191924"/><rect x="28" y="14" width="8" height="14" fill="#191924"/><rect x="42" y="14" width="8" height="14" fill="#191924"/><circle cx="22" cy="42" r="5" fill="#fff"><animate attributeName="r" values="5;6.5;5" dur="1.6s" repeatCount="indefinite"/></circle><circle cx="42" cy="42" r="5" fill="#ff5c8a"><animate attributeName="r" values="5;6.5;5" dur="1.6s" begin="0.4s" repeatCount="indefinite"/></circle></svg>
+  </div>
+  <div>
+    <h1>SVG Factory</h1>
+    <p class="tag">Animate any SVG. Copy it. Ship it — no code to write.</p>
+  </div>
+  <nav>
+    <a href="#tool">Tool</a>
+    <a href="#gallery">Gallery</a>
+  </nav>
+</header>
+<main>
+  <div class="grid" id="tool">
+    <div class="card">
+      <h2><span class="step">1</span> Bring an SVG</h2>
+      <p class="hint">Paste SVG code, upload a file, or start with the sample.</p>
+      <textarea id="src" spellcheck="false" placeholder="Paste &lt;svg&gt;…&lt;/svg&gt; code here"></textarea>
+      <div class="row" style="margin-top:10px">
+        <button class="btn primary" id="loadBtn" title="Load the pasted code into the preview">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          Load
+        </button>
+        <button class="btn" id="sampleBtn" title="Load a sample SVG to play with">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/></svg>
+          Sample
+        </button>
+        <label class="btn" for="file" title="Upload an .svg file" style="cursor:pointer">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 16V4m0 0L7 9m5-5l5 5"/><path d="M4 20h16"/></svg>
+          Upload
+        </label>
+        <input type="file" id="file" accept=".svg,image/svg+xml" hidden>
+      </div>
+      <div class="drop" id="drop">…or drop an .svg file here</div>
+      <div class="err" id="srcErr"></div>
+    </div>
+
+    <div class="card">
+      <h2><span class="step">2</span> Preview</h2>
+      <p class="hint">This is exactly what your exported file will do.</p>
+      <div class="stage" id="stage"><div class="empty">Nothing loaded yet.<br>Load the sample to see it in action.</div></div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn" id="replayBtn" title="Restart the animation from the beginning">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+          Replay
+        </button>
+        <span style="color:var(--muted);font-size:13px" id="sizeInfo"></span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="step">3</span> Pick the parts</h2>
+      <p class="hint">Click parts to select them — animate one, or many at once. For draw-on, parts reveal in list order.</p>
+      <div class="row" style="margin-bottom:10px">
+        <button class="btn" id="selAll">Select all</button>
+        <button class="btn" id="selNone">Select none</button>
+        <span style="color:var(--muted);font-size:13px" id="selInfo"></span>
+      </div>
+      <div class="els" id="els"><p class="hint">Parts will appear here once an SVG is loaded.</p></div>
+      <div class="ctl" style="margin-top:14px">
+        <label>Recolor selected parts</label>
+        <div class="row">
+          <input type="color" id="fillColor" value="#ff5c8a">
+          <button class="btn" id="applyFill" title="Set the fill color on selected parts (not animated)">Set fill</button>
+          <button class="btn" id="applyStroke" title="Set the stroke color on selected parts (not animated)">Set stroke</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="step">4</span> Animate</h2>
+      <p class="hint">Pick an effect, tune it, hit Apply. Stack as many as you like.</p>
+      <div class="presets" id="presets"></div>
+      <div class="ctl">
+        <label>Duration <output id="durOut">1.5s</output></label>
+        <input type="range" id="dur" min="0.2" max="6" step="0.1" value="1.5">
+      </div>
+      <div class="ctl">
+        <label>Delay <output id="delayOut">0s</output></label>
+        <input type="range" id="delay" min="0" max="3" step="0.1" value="0">
+      </div>
+      <div class="row" style="justify-content:space-between">
+        <div>
+          <div style="font-size:13px;font-weight:600;margin-bottom:5px">Repeat</div>
+          <div class="switch" id="loopSwitch">
+            <button data-loop="infinite" class="on">Loop</button>
+            <button data-loop="1">Once</button>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:13px;font-weight:600;margin-bottom:5px">Easing</div>
+          <select id="easing">
+            <option value="ease">Ease</option>
+            <option value="ease-in-out" selected>Ease in-out</option>
+            <option value="ease-out">Ease out</option>
+            <option value="linear">Linear</option>
+            <option value="cubic-bezier(.34,1.56,.64,1)">Bouncy</option>
+          </select>
+        </div>
+      </div>
+      <div class="ctl" id="colorCtl" style="display:none">
+        <label>Fade to this color</label>
+        <input type="color" id="toColor" value="#6c4dff">
+      </div>
+      <div class="ctl" id="morphCtl" style="display:none">
+        <label>Morph target — paste a path <span class="kbd">d</span> with the same commands as the original</label>
+        <textarea id="morphTo" style="min-height:56px" spellcheck="false" placeholder="M100,20 L130,90 L70,90 Z"></textarea>
+      </div>
+      <div class="row" style="margin-top:14px">
+        <button class="btn primary" id="applyBtn" title="Apply this effect to the selected parts">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          Apply to selected
+        </button>
+        <button class="btn" id="clearAnims">Clear all effects</button>
+      </div>
+      <div class="applied" id="applied"></div>
+    </div>
+
+    <div class="card out">
+      <h2><span class="step">5</span> Take it</h2>
+      <p class="hint">One self-contained file — no scripts, no links. Works as an <span class="kbd">&lt;img&gt;</span>, inline in HTML, and in Rise, Storyline, and D2L.</p>
+      <textarea class="outbox" id="out" readonly spellcheck="false" placeholder="Your animated SVG code appears here once you apply an effect"></textarea>
+      <div class="row" style="margin-top:10px">
+        <button class="btn primary" id="copyBtn" title="Copy the SVG code to your clipboard">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>
+          Copy code
+        </button>
+        <button class="btn pink" id="dlBtn" title="Download the animated .svg file">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 4v12m0 0l-5-5m5 5l5-5"/><path d="M4 20h16"/></svg>
+          Download .svg
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <section id="gallery">
+    <h2 class="sec">Gallery</h2>
+    <p class="sub">Ready-made animated SVGs. Copy the code or download the file — free to use anywhere.</p>
+    <div class="gallery" id="galleryGrid"></div>
+  </section>
+</main>
+<footer>SVG Factory — animations are baked into the file itself (CSS / SMIL inside the SVG), so they play wherever SVG images play.</footer>
+<div id="toast" role="status"></div>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const SEL="path,circle,rect,ellipse,line,polyline,polygon,text";
+const SVGNS="http://www.w3.org/2000/svg";
+let original=null, info=[], lengths={}, selected=new Set(), animations=[], aid=0;
+let curPreset="draw", curLoop="infinite";
+
+const ICONS={
+ draw:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20c4-1 3-3 6-6l8-8a2.1 2.1 0 0 0-3-3l-8 8c-3 3-2 2-3 9z"/><path d="M13.5 6.5l3 3"/></svg>',
+ fade:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor" stroke="none"/></svg>',
+ pulse:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2.5-6 4 12 2.5-6h5"/></svg>',
+ spin:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 3v5h-5"/></svg>',
+ bounce:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 4v11m0 0l-4-4m4 4l4-4"/><path d="M5 20h14"/></svg>',
+ slide:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12h15m0 0l-5-5m5 5l-5 5"/><path d="M21 5v14" stroke-dasharray="2 3"/></svg>',
+ wiggle:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 12c2.5-5 5-5 7.5 0s5 5 7.5 0 3-3 5-1"/></svg>',
+ colorfade:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3s6 6.6 6 11a6 6 0 0 1-12 0c0-4.4 6-11 6-11z"/><path d="M9.5 14.5a2.5 2.5 0 0 0 2.5 2.5" stroke-linecap="round"/></svg>',
+ morph:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="7.5" cy="12" r="3.5"/><rect x="14" y="8" width="7" height="8" rx="1"/><path d="M11 12h2" stroke-linecap="round"/></svg>'
+};
+const PRESETS=[
+ ["draw","Draw on"],["fade","Fade"],["pulse","Pulse"],["spin","Spin"],
+ ["bounce","Bounce"],["slide","Slide in"],["wiggle","Wiggle"],["colorfade","Color fade"],["morph","Morph"]
+];
+
+const SAMPLE='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 160" width="220" height="160">'
++'<circle cx="58" cy="52" r="24" fill="#ffb703" stroke="#e07b00" stroke-width="3"/>'
++'<line x1="58" y1="10" x2="58" y2="20" stroke="#e07b00" stroke-width="4" stroke-linecap="round"/>'
++'<line x1="58" y1="84" x2="58" y2="94" stroke="#e07b00" stroke-width="4" stroke-linecap="round"/>'
++'<line x1="16" y1="52" x2="26" y2="52" stroke="#e07b00" stroke-width="4" stroke-linecap="round"/>'
++'<line x1="90" y1="52" x2="100" y2="52" stroke="#e07b00" stroke-width="4" stroke-linecap="round"/>'
++'<path d="M168 34c-7-13-28-7-28 6 0 11 15 19 28 28 13-9 28-17 28-28 0-13-21-19-28-6z" fill="#ff5c8a"/>'
++'<polygon points="58,106 65,124 84,124 69,135 74,153 58,142 42,153 47,135 32,124 51,124" fill="#6c4dff"/>'
++'<path d="M128 138h76" stroke="#0da678" stroke-width="5" stroke-linecap="round"/>'
++'<path d="M140 118l10 10 22-24" fill="none" stroke="#191924" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>'
++'</svg>';
+
+function toast(msg){const t=$("toast");t.textContent=msg;t.classList.add("show");clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("show"),1800);}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;");}
+function sanitize(root){
+  root.querySelectorAll("script,foreignObject").forEach(n=>n.remove());
+  root.querySelectorAll("*").forEach(n=>{[...n.attributes].forEach(a=>{
+    if(/^on/i.test(a.name)||(/^(xlink:)?href$/i.test(a.name)&&/^\s*javascript:/i.test(a.value)))n.removeAttribute(a.name);});});
+}
+function loadSVG(text){
+  const doc=new DOMParser().parseFromString(text,"image/svg+xml");
+  if(doc.querySelector("parsererror")||!doc.querySelector("svg")){$("srcErr").textContent="That doesn't parse as an SVG — check the code and try again.";return false;}
+  const svg=doc.querySelector("svg");sanitize(svg);
+  if(!svg.getAttribute("xmlns"))svg.setAttribute("xmlns",SVGNS);
+  original=svg;info=[];lengths={};selected=new Set();animations=[];
+  svg.querySelectorAll(SEL).forEach((el,i)=>{
+    info.push({tag:el.tagName.toLowerCase(),fill:el.getAttribute("fill")||"",stroke:el.getAttribute("stroke")||"",d:el.getAttribute("d")||""});
+    selected.add(i);
+  });
+  $("srcErr").textContent="";
+  $("sizeInfo").textContent=(svg.getAttribute("viewBox")?"viewBox "+svg.getAttribute("viewBox"):"no viewBox")+" · "+info.length+" parts";
+  renderEls();renderApplied();updatePreview();
+  const stageSvg=$("stage").querySelector("svg");
+  if(stageSvg){stageSvg.querySelectorAll(SEL).forEach((el,i)=>{try{lengths[i]=el.getTotalLength();}catch(e){lengths[i]=300;}});}
+  return true;
+}
+function renderEls(){
+  const box=$("els");
+  if(!info.length){box.innerHTML='<p class="hint">Parts will appear here once an SVG is loaded.</p>';$("selInfo").textContent="";return;}
+  box.innerHTML="";
+  info.forEach((p,i)=>{
+    const b=document.createElement("button");b.className="el"+(selected.has(i)?" sel":"");
+    const col=p.fill&&p.fill!=="none"?p.fill:(p.stroke&&p.stroke!=="none"?p.stroke:"#ccccdd");
+    b.innerHTML='<span class="tag">'+esc(p.tag)+'</span><span>Part '+(i+1)+'</span><span class="dot" style="background:'+esc(col)+'"></span><span class="meta">'+(lengths[i]?"len "+Math.round(lengths[i]):"")+'</span>';
+    b.title="Select / deselect this part";
+    b.onclick=()=>{selected.has(i)?selected.delete(i):selected.add(i);renderEls();};
+    box.appendChild(b);
+  });
+  $("selInfo").textContent=selected.size+" of "+info.length+" selected";
+}
+function kfFor(a,i){
+  const inf=a.loop==="infinite";
+  switch(a.preset){
+    case "draw":{const len=lengths[i]||300;return{css:"@keyframes sf"+a.id+"{from{stroke-dashoffset:"+len+"}to{stroke-dashoffset:0}}",extra:"stroke-dasharray:"+len+";stroke-dashoffset:"+len,dir:""};}
+    case "fade":return{css:"@keyframes sf"+a.id+"{from{opacity:0}to{opacity:1}}",extra:"",dir:inf?" alternate":""};
+    case "pulse":return{css:"@keyframes sf"+a.id+"{0%{transform:scale(1)}50%{transform:scale(1.13)}100%{transform:scale(1)}}",extra:"transform-box:fill-box;transform-origin:center",dir:""};
+    case "spin":return{css:"@keyframes sf"+a.id+"{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}",extra:"transform-box:fill-box;transform-origin:center",dir:""};
+    case "bounce":return{css:"@keyframes sf"+a.id+"{0%,100%{transform:translateY(0)}45%{transform:translateY(-14px)}}",extra:"transform-box:fill-box;transform-origin:center",dir:""};
+    case "slide":return{css:"@keyframes sf"+a.id+"{from{transform:translateX(-24px);opacity:0}to{transform:translateX(0);opacity:1}}",extra:"transform-box:fill-box;transform-origin:center",dir:inf?" alternate":""};
+    case "wiggle":return{css:"@keyframes sf"+a.id+"{0%,100%{transform:rotate(0deg)}25%{transform:rotate(-7deg)}60%{transform:rotate(6deg)}80%{transform:rotate(-3deg)}}",extra:"transform-box:fill-box;transform-origin:center",dir:""};
+    case "colorfade":{const from=(info[i].fill&&info[i].fill!=="none")?info[i].fill:"#191924";const hasStroke=info[i].stroke&&info[i].stroke!=="none";
+      return{css:"@keyframes sf"+a.id+"{from{fill:"+from+(hasStroke?";stroke:"+info[i].stroke:"")+"}to{fill:"+a.color+(hasStroke?";stroke:"+a.color:"")+"}}",extra:"",dir:inf?" alternate":""};}
+  }
+  return{css:"",extra:"",dir:""};
+}
+function buildString(){
+  if(!original)return"";
+  const clone=original.cloneNode(true);
+  const els=clone.querySelectorAll(SEL);
+  const cssParts=[],perEl={};
+  animations.forEach(a=>{
+    const el=els[a.el];if(!el)return;
+    if(a.preset==="morph"){
+      if(!a.morph||!info[a.el].d)return;
+      const an=document.createElementNS(SVGNS,"animate");
+      an.setAttribute("attributeName","d");an.setAttribute("dur",a.dur+"s");an.setAttribute("begin",a.delay+"s");
+      an.setAttribute("repeatCount",a.loop==="infinite"?"indefinite":"1");
+      if(a.loop==="infinite"){an.setAttribute("values",info[a.el].d+";"+a.morph+";"+info[a.el].d);}
+      else{an.setAttribute("values",info[a.el].d+";"+a.morph);an.setAttribute("fill","freeze");}
+      el.appendChild(an);return;
+    }
+    const k=kfFor(a,a.el);cssParts.push(k.css);
+    if(a.preset==="draw"){
+      if(!el.getAttribute("stroke")||el.getAttribute("stroke")==="none")el.setAttribute("stroke",(info[a.el].fill&&info[a.el].fill!=="none")?info[a.el].fill:"#191924");
+      if(!el.getAttribute("stroke-width"))el.setAttribute("stroke-width","3");
+    }
+    const sh="sf"+a.id+" "+a.dur+"s "+a.easing+" "+a.delay+"s "+(a.loop==="infinite"?"infinite":"1")+k.dir+(a.loop==="infinite"?"":" forwards");
+    (perEl[a.el]=perEl[a.el]||{anim:[],extra:[]}).anim.push(sh);
+    if(k.extra)perEl[a.el].extra.push(k.extra);
+  });
+  Object.keys(perEl).forEach(i=>{
+    const el=els[i],p=perEl[i],prev=el.getAttribute("style")||"";
+    el.setAttribute("style",(prev?prev.replace(/;?\s*$/,";"):"")+"animation:"+p.anim.join(",")+";"+p.extra.join(";"));
+  });
+  if(cssParts.length){
+    const st=document.createElementNS(SVGNS,"style");st.textContent=cssParts.join("");
+    clone.insertBefore(st,clone.firstChild);
+  }
+  return new XMLSerializer().serializeToString(clone);
+}
+function updatePreview(){
+  if(!original)return;
+  $("stage").innerHTML=buildString();
+  $("out").value=animations.length?buildString():"";
+  const stageSvg=$("stage").querySelector("svg");
+  if(stageSvg&&!Object.keys(lengths).length){stageSvg.querySelectorAll(SEL).forEach((el,i)=>{try{lengths[i]=el.getTotalLength();}catch(e){lengths[i]=300;}});renderEls();}
+}
+function renderApplied(){
+  const box=$("applied");box.innerHTML="";
+  if(!animations.length){box.innerHTML='<p class="hint" style="margin:0">No effects yet — your applied effects will stack here.</p>';return;}
+  animations.forEach((a,idx)=>{
+    const d=document.createElement("div");d.className="ap";
+    const name=(PRESETS.find(p=>p[0]===a.preset)||[])[1]||a.preset;
+    d.innerHTML="<b>"+esc(name)+"</b><span>"+esc(info[a.el]?info[a.el].tag:"")+" #"+(a.el+1)+"</span><span style='color:var(--muted)'>"+a.dur+"s · delay "+a.delay+"s · "+(a.loop==="infinite"?"loop":"once")+"</span>";
+    if(a.preset==="draw"){
+      const up=document.createElement("button");up.className="iconbtn";up.textContent="↑";up.title="Reveal earlier (swap delay with the draw above)";
+      up.onclick=()=>{const prev=[...animations.slice(0,idx)].reverse().find(x=>x.preset==="draw");if(prev){const t=prev.delay;prev.delay=a.delay;a.delay=t;renderApplied();updatePreview();}};
+      const dn=document.createElement("button");dn.className="iconbtn";dn.textContent="↓";dn.title="Reveal later (swap delay with the draw below)";
+      dn.onclick=()=>{const nxt=animations.slice(idx+1).find(x=>x.preset==="draw");if(nxt){const t=nxt.delay;nxt.delay=a.delay;a.delay=t;renderApplied();updatePreview();}};
+      d.appendChild(up);d.appendChild(dn);
+    }
+    const x=document.createElement("button");x.className="iconbtn x";x.textContent="✕";x.title="Remove this effect";
+    x.onclick=()=>{animations.splice(idx,1);renderApplied();updatePreview();};
+    d.appendChild(x);box.appendChild(d);
+  });
+}
+/* presets + controls */
+const presetsBox=$("presets");
+PRESETS.forEach(([key,label])=>{
+  const b=document.createElement("button");b.className="preset"+(key===curPreset?" on":"");b.dataset.preset=key;
+  b.innerHTML=ICONS[key]+"<span>"+label+"</span>";b.title=label;
+  b.onclick=()=>{curPreset=key;presetsBox.querySelectorAll(".preset").forEach(x=>x.classList.toggle("on",x.dataset.preset===key));
+    $("colorCtl").style.display=key==="colorfade"?"block":"none";
+    $("morphCtl").style.display=key==="morph"?"block":"none";};
+  presetsBox.appendChild(b);
+});
+$("dur").oninput=e=>$("durOut").textContent=(+e.target.value).toFixed(1)+"s";
+$("delay").oninput=e=>$("delayOut").textContent=(+e.target.value).toFixed(1)+"s";
+$("loopSwitch").querySelectorAll("button").forEach(b=>b.onclick=()=>{curLoop=b.dataset.loop;$("loopSwitch").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b));});
+
+$("applyBtn").onclick=()=>{
+  if(!original){toast("Load an SVG first");return;}
+  if(!selected.size){toast("Pick at least one part first");return;}
+  const dur=+$("dur").value, baseDelay=+$("delay").value, easing=$("easing").value;
+  const targets=[...selected].sort((x,y)=>x-y);
+  if(curPreset==="morph"){
+    const t=$("morphTo").value.trim();
+    if(!t){toast("Paste a morph target path first");return;}
+    const bad=targets.filter(i=>info[i].tag!=="path");
+    if(bad.length){toast("Morph only works on path parts");return;}
+    targets.forEach(i=>animations.push({id:++aid,el:i,preset:"morph",dur,delay:baseDelay,loop:curLoop,easing,morph:t}));
+  }else{
+    targets.forEach((i,pos)=>{
+      const delay=curPreset==="draw"&&targets.length>1?+(baseDelay+pos*dur*0.85).toFixed(2):baseDelay;
+      animations.push({id:++aid,el:i,preset:curPreset,dur,delay,loop:curLoop,easing,color:$("toColor").value});
+    });
+  }
+  renderApplied();updatePreview();toast("Effect applied — check the preview");
+};
+$("clearAnims").onclick=()=>{animations=[];renderApplied();updatePreview();};
+$("applyFill").onclick=()=>{if(!original||!selected.size)return;selected.forEach(i=>{const el=original.querySelectorAll(SEL)[i];el.setAttribute("fill",$("fillColor").value);info[i].fill=$("fillColor").value;});renderEls();updatePreview();toast("Fill set");};
+$("applyStroke").onclick=()=>{if(!original||!selected.size)return;selected.forEach(i=>{const el=original.querySelectorAll(SEL)[i];el.setAttribute("stroke",$("fillColor").value);info[i].stroke=$("fillColor").value;});renderEls();updatePreview();toast("Stroke set");};
+$("selAll").onclick=()=>{info.forEach((_,i)=>selected.add(i));renderEls();};
+$("selNone").onclick=()=>{selected.clear();renderEls();};
+$("loadBtn").onclick=()=>{const v=$("src").value.trim();if(v)loadSVG(v);else $("srcErr").textContent="Paste some SVG code first — or hit Sample.";};
+$("sampleBtn").onclick=()=>{$("src").value=SAMPLE;loadSVG(SAMPLE);toast("Sample loaded");};
+$("replayBtn").onclick=()=>{updatePreview();};
+$("file").onchange=e=>{const f=e.target.files[0];if(f)readFile(f);};
+function readFile(f){const r=new FileReader();r.onload=()=>{$("src").value=r.result;loadSVG(r.result);};r.readAsText(f);}
+const drop=$("drop");
+["dragenter","dragover"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add("over");}));
+["dragleave","drop"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove("over");}));
+drop.addEventListener("drop",e=>{const f=e.dataTransfer.files[0];if(f)readFile(f);});
+
+function download(name,text){
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([text],{type:"image/svg+xml"}));a.download=name;a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+}
+async function copyText(text,okMsg){
+  try{await navigator.clipboard.writeText(text);toast(okMsg);}
+  catch(e){const ta=document.createElement("textarea");ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand("copy");ta.remove();toast(okMsg);}
+}
+$("copyBtn").onclick=()=>{const v=$("out").value;if(v)copyText(v,"SVG code copied");else toast("Apply an effect first");};
+$("dlBtn").onclick=()=>{const v=$("out").value;if(v){download("svg-factory.svg",v);toast("Downloading your SVG");}else toast("Apply an effect first");};
+
+/* gallery */
+const GALLERY=[
+ {title:"Draw-on Check",desc:"Ring and tick draw themselves in.",svg:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><style>.r{stroke-dasharray:277;stroke-dashoffset:277;animation:d 3s ease-in-out infinite}@keyframes d{0%{stroke-dashoffset:277}55%,100%{stroke-dashoffset:0}}.t{stroke-dasharray:62;stroke-dashoffset:62;animation:t 3s ease-in-out infinite}@keyframes t{0%,50%{stroke-dashoffset:62}80%,100%{stroke-dashoffset:0}}</style><path class="r" d="M50 6 A44 44 0 1 1 49.9 6" fill="none" stroke="#0da678" stroke-width="6" stroke-linecap="round"/><path class="t" d="M32 52l13 13 24-29" fill="none" stroke="#0da678" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg>'},
+ {title:"Pulsing Heart",desc:"A heartbeat scale loop.",svg:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><style>.h{transform-box:fill-box;transform-origin:center;animation:p 1.2s ease-in-out infinite}@keyframes p{0%,100%{transform:scale(1)}30%{transform:scale(1.14)}45%{transform:scale(1.05)}}</style><path class="h" d="M50 84C20 62 12 44 12 31 12 17 23 8 35 8c7 0 12 3 15 8 3-5 8-8 15-8 12 0 23 9 23 23 0 13-8 31-38 53z" fill="#ff5c8a"/></svg>'},
+ {title:"Spinning Star",desc:"Slow, smooth rotation.",svg:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><style>.s{transform-box:fill-box;transform-origin:center;animation:r 6s linear infinite}@keyframes r{to{transform:rotate(360deg)}}</style><polygon class="s" points="50,6 61,38 95,38 67,57 77,90 50,70 23,90 33,57 5,38 39,38" fill="#ffb703" stroke="#e07b00" stroke-width="3" stroke-linejoin="round"/></svg>'},
+ {title:"Bouncing Arrow",desc:"Points the way down — scroll cue.",svg:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><style>.a{animation:b 1.4s ease-in-out infinite}@keyframes b{0%,100%{transform:translateY(0)}50%{transform:translateY(14px)}}</style><g class="a"><path d="M50 14v52" stroke="#6c4dff" stroke-width="9" stroke-linecap="round"/><path d="M26 46l24 26 24-26" fill="none" stroke="#6c4dff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/></g></svg>'},
+ {title:"Wiggle Bell",desc:"A notification wiggle.",svg:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><style>.b{transform-box:fill-box;transform-origin:50% 8%;animation:w 2.2s ease-in-out infinite}@keyframes w{0%,55%,100%{transform:rotate(0)}60%{transform:rotate(-11deg)}70%{transform:rotate(9deg)}80%{transform:rotate(-5deg)}90%{transform:rotate(3deg)}}</style><g class="b"><path d="M50 10a8 8 0 0 1 8 8c10 4 14 12 14 24 0 10 3 14 6 18H22c3-4 6-8 6-18 0-12 4-20 14-24a8 8 0 0 1 8-8z" fill="#6c4dff"/><circle cx="50" cy="70" r="8" fill="#ff5c8a"/></g></svg>'},
+ {title:"Color-Fade Sun",desc:"Warm color breathing loop.",svg:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><style>.c{animation:f 3s ease-in-out infinite alternate}@keyframes f{from{fill:#ffb703;stroke:#e07b00}to{fill:#ff5c8a;stroke:#c2255c}}.cr{animation:f2 3s ease-in-out infinite alternate}@keyframes f2{from{stroke:#e07b00}to{stroke:#c2255c}}</style><g stroke-width="5" stroke-linecap="round" class="cr" stroke="#e07b00"><line x1="50" y1="4" x2="50" y2="14"/><line x1="50" y1="86" x2="50" y2="96"/><line x1="4" y1="50" x2="14" y2="50"/><line x1="86" y1="50" x2="96" y2="50"/><line x1="18" y1="18" x2="25" y2="25"/><line x1="75" y1="75" x2="82" y2="82"/><line x1="82" y1="18" x2="75" y2="25"/><line x1="25" y1="75" x2="18" y2="82"/></g><circle class="c" cx="50" cy="50" r="21" fill="#ffb703" stroke="#e07b00" stroke-width="4"/></svg>'},
+ {title:"Morph Blob",desc:"One shape melting into another (SMIL).",svg:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M50 5 C70 5 95 25 95 50 C95 75 70 95 50 95 C30 95 5 75 5 50 C5 25 30 5 50 5 Z" fill="#6c4dff"><animate attributeName="d" dur="4s" repeatCount="indefinite" values="M50 5 C70 5 95 25 95 50 C95 75 70 95 50 95 C30 95 5 75 5 50 C5 25 30 5 50 5 Z;M50 12 C86 2 92 30 88 52 C84 74 72 88 48 90 C24 92 10 76 12 50 C14 24 22 16 50 12 Z;M50 5 C70 5 95 25 95 50 C95 75 70 95 50 95 C30 95 5 75 5 50 C5 25 30 5 50 5 Z"/></path></svg>'},
+ {title:"Equalizer Bars",desc:"Loading / audio bars.",svg:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><style>.e{transform-box:fill-box;transform-origin:50% 100%;animation:q 1s ease-in-out infinite}.e2{animation-delay:.18s}.e3{animation-delay:.36s}@keyframes q{0%,100%{transform:scaleY(.35)}50%{transform:scaleY(1)}}</style><rect class="e" x="16" y="22" width="16" height="62" rx="5" fill="#6c4dff"/><rect class="e e2" x="42" y="22" width="16" height="62" rx="5" fill="#ff5c8a"/><rect class="e e3" x="68" y="22" width="16" height="62" rx="5" fill="#0da678"/></svg>'}
+];
+const grid=$("galleryGrid");
+GALLERY.forEach((g,i)=>{
+  const card=document.createElement("div");card.className="gcard";
+  card.innerHTML='<div class="gprev">'+g.svg+'</div><div class="gbody"><h3>'+esc(g.title)+'</h3><p>'+esc(g.desc)+'</p>'
+   +'<div class="row"><button class="btn" data-copy="'+i+'" title="Copy this SVG\'s code">Copy code</button>'
+   +'<button class="btn" data-dl="'+i+'" title="Download this SVG file">Download</button></div></div>';
+  grid.appendChild(card);
+});
+grid.addEventListener("click",e=>{
+  const c=e.target.closest("[data-copy]"),d=e.target.closest("[data-dl]");
+  if(c)copyText(GALLERY[+c.dataset.copy].svg,"Copied — paste it anywhere");
+  if(d){download(GALLERY[+d.dataset.dl].title.toLowerCase().replace(/[^a-z0-9]+/g,"-")+".svg",GALLERY[+d.dataset.dl].svg);toast("Downloading");}
+});
+
+/* init */
+$("src").value=SAMPLE;
+loadSVG(SAMPLE);
+</script>
+</html>
