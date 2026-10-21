@@ -142,6 +142,11 @@ section.viewhead p{color:var(--muted);margin:0 0 14px;font-size:14px}
 footer{max-width:1180px;margin:0 auto;padding:0 20px 34px;color:var(--muted);font-size:13px}
 .kbd{font-family:ui-monospace,Menlo,monospace;background:#eeeef7;border-radius:5px;padding:1px 6px;font-size:12px}
 [hidden]{display:none!important}
+/* v3.1 — one unified widget: preview on top, controls below, nothing floats */
+.studio{display:flex;flex-direction:column;gap:0;background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);overflow:hidden}
+.stagecard{order:1;position:static;border:0;box-shadow:none;border-radius:0;border-bottom:1px solid var(--line)}
+.panel{order:2;position:static;transform:none;left:auto;bottom:auto;width:auto;max-height:none;overflow:visible;border:0;box-shadow:none;border-radius:0;background:#fbfbfe;z-index:auto;padding:16px}
+.panel.closed .stepper,.panel.closed .panelbody{display:block}
 </style>
 </head>
 <body>
@@ -162,12 +167,6 @@ footer{max-width:1180px;margin:0 auto;padding:0 20px 34px;color:var(--muted);fon
   <div id="viewCreate">
     <div class="studio">
       <div class="card panel" id="drawer">
-        <div class="drawerhead" id="drawerHead" title="Expand or collapse the controls">
-          <span class="grip"></span>
-          <span class="dttl" id="drawerTitle">Step 1 — Add an SVG</span>
-          <span class="dsum" id="drawerSummary"></span>
-          <button class="chev" id="drawerToggle" aria-label="Expand or collapse controls">▾</button>
-        </div>
         <div class="stepper" role="tablist" aria-label="Steps">
           <button class="stepbtn on" data-step="1"><span class="num">1</span><span><span class="lab">Add an SVG</span><span class="sub">Paste, upload, or sample</span></span></button>
           <button class="stepbtn" data-step="2"><span class="num">2</span><span><span class="lab">Pick parts</span><span class="sub">Choose what moves</span></span></button>
@@ -364,14 +363,6 @@ function updateStates(){
   $("exportSummary").textContent=animations.length?
     animations.length+(animations.length===1?" effect":" effects")+" applied — your finished, self-contained file is ready:":
     "Nothing to export yet — add an effect in step 3 and your finished file appears here.";
-  const names={1:"Add an SVG",2:"Pick parts",3:"Add motion",4:"Export"};
-  $("drawerTitle").textContent="Step "+curStep+" — "+names[curStep];
-  $("drawerSummary").textContent=original?(info.length+" parts · "+selected.size+" selected · "+animations.length+(animations.length===1?" effect":" effects")):"";
-  fitDrawer();
-}
-function fitDrawer(){
-  const d=$("drawer");if(!d)return;
-  document.body.style.paddingBottom=(d.offsetHeight+22)+"px";
 }
 function showStep(n){
   curStep=n;
@@ -384,7 +375,6 @@ function showView(v){
   $("viewGallery").hidden=v!=="gallery";
   $("tabCreate").classList.toggle("on",v==="create");
   $("tabGallery").classList.toggle("on",v==="gallery");
-  fitDrawer();
 }
 function loadSVG(text){
   const doc=new DOMParser().parseFromString(text,"image/svg+xml");
@@ -538,14 +528,8 @@ $("tabCreate").onclick=()=>showView("create");
 $("tabGallery").onclick=()=>showView("gallery");
 $("startOver").onclick=()=>{animations=[];renderApplied();updatePreview();showStep(1);toast("Effects cleared — load a new SVG in step 1");};
 
-/* drawer */
-const drawerEl=$("drawer");
-function setDrawer(open){drawerEl.classList.toggle("closed",!open);$("drawerToggle").textContent=open?"▾":"▴";fitDrawer();}
-$("drawerHead").onclick=()=>setDrawer(drawerEl.classList.contains("closed"));
-window.addEventListener("resize",fitDrawer);
-
 /* timing & options — hidden until wanted, or until the chosen effect needs them */
-function setTune(open){$("tuneBox").hidden=!open;$("tuneToggle").textContent=open?"Timing & options ▴":"Timing & options ▾";fitDrawer();}
+function setTune(open){$("tuneBox").hidden=!open;$("tuneToggle").textContent=open?"Timing & options ▴":"Timing & options ▾";}
 $("tuneToggle").onclick=()=>setTune($("tuneBox").hidden);
 
 /* groups */
