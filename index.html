@@ -24,11 +24,29 @@ h1{font-size:26px;margin:0;letter-spacing:-.5px}
 .viewtabs button.on{background:#fff;color:var(--ink);box-shadow:0 2px 8px rgba(25,25,60,.12)}
 main{max-width:1180px;margin:0 auto;padding:14px 20px 40px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
-.studio{display:grid;grid-template-columns:372px 1fr;gap:16px;align-items:start}
-@media(max-width:900px){.studio{grid-template-columns:1fr}}
-.panel{padding:14px;position:sticky;top:14px}
-@media(max-width:900px){.panel{position:static}}
-.stepper{display:flex;flex-direction:column;gap:2px;margin-bottom:6px}
+.studio{display:grid;grid-template-columns:1fr;gap:16px;align-items:start}
+.panel{padding:10px 16px 16px;position:fixed;left:50%;transform:translateX(-50%);bottom:10px;width:min(1160px,calc(100% - 20px));max-height:54vh;overflow-y:auto;z-index:40}
+.panel .stepbtn .sub{display:none}
+.panel.closed{overflow:hidden}
+.panel.closed .stepper,.panel.closed .panelbody{display:none}
+.drawerhead{display:flex;align-items:center;gap:10px;padding:6px 2px 10px;cursor:pointer;user-select:none}
+.grip{width:42px;height:5px;border-radius:99px;background:#d8d8ea;flex:0 0 auto;margin:0 auto;position:absolute;left:50%;transform:translateX(-50%);top:6px}
+.drawerhead .dttl{font-weight:800;font-size:14.5px}
+.drawerhead .dsum{color:var(--muted);font-size:12.5px}
+.drawerhead .chev{margin-left:auto;font-size:16px;color:var(--muted);border:0;background:transparent;cursor:pointer;padding:4px 8px}
+.stepper{display:flex;flex-direction:row;flex-wrap:wrap;gap:4px;margin-bottom:6px}
+.stepbtn{flex:1;min-width:120px}
+.stepbtn .sub{display:none}
+.stage svg .hili{stroke:var(--accent)!important;filter:drop-shadow(0 0 5px rgba(108,77,255,.95))}
+.stage svg .dim{opacity:.28}
+.stage svg [data-part]{cursor:pointer}
+.groups{display:flex;flex-direction:column;gap:6px;margin:8px 0 4px}
+.grow{display:flex;align-items:center;gap:8px;border:1.5px solid var(--accent);background:var(--accent-soft);border-radius:10px;padding:7px 10px;font-size:13px}
+.grow .gname{font-weight:800}
+.grow .gcount{color:var(--muted);font-size:12px}
+.grow .gbtn{margin-left:auto}
+.gmembers{display:none;flex-direction:column;gap:6px;margin:0 0 4px 18px}
+.gmembers.open{display:flex}
 .stepbtn{display:flex;align-items:center;gap:11px;width:100%;text-align:left;border:0;background:transparent;font:inherit;padding:9px 10px;border-radius:12px;cursor:pointer;transition:background .13s}
 .stepbtn:hover{background:#f6f6fc}
 .stepbtn.on{background:var(--accent-soft)}
@@ -66,7 +84,7 @@ textarea:focus,input:focus,select:focus{outline:2px solid var(--accent);outline-
 .chip{font-size:12px;font-weight:700;background:#eeeef7;color:var(--muted);border-radius:999px;padding:4px 10px}
 .chip.hot{background:var(--accent-soft);color:var(--accent)}
 .stagetoolbar .sp{flex:1}
-.stage{background:repeating-conic-gradient(#f0f0f7 0% 25%,#fafaff 0% 50%) 50%/22px 22px;border:1px solid var(--line);border-radius:14px;min-height:380px;display:flex;align-items:center;justify-content:center;padding:22px;overflow:hidden}
+.stage{background:repeating-conic-gradient(#f0f0f7 0% 25%,#fafaff 0% 50%) 50%/22px 22px;border:1px solid var(--line);border-radius:14px;min-height:320px;display:flex;align-items:center;justify-content:center;padding:22px;overflow:hidden}
 .stage svg{max-width:100%;max-height:400px;width:auto;height:auto}
 .stage .empty{color:var(--muted);font-size:14px;text-align:center;padding:30px 10px}
 .stagehint{color:var(--muted);font-size:13.5px;margin:12px 2px 0;line-height:1.45}
@@ -143,7 +161,13 @@ footer{max-width:1180px;margin:0 auto;padding:0 20px 34px;color:var(--muted);fon
 <main>
   <div id="viewCreate">
     <div class="studio">
-      <div class="card panel">
+      <div class="card panel" id="drawer">
+        <div class="drawerhead" id="drawerHead" title="Expand or collapse the controls">
+          <span class="grip"></span>
+          <span class="dttl" id="drawerTitle">Step 1 — Add an SVG</span>
+          <span class="dsum" id="drawerSummary"></span>
+          <button class="chev" id="drawerToggle" aria-label="Expand or collapse controls">▾</button>
+        </div>
         <div class="stepper" role="tablist" aria-label="Steps">
           <button class="stepbtn on" data-step="1"><span class="num">1</span><span><span class="lab">Add an SVG</span><span class="sub">Paste, upload, or sample</span></span></button>
           <button class="stepbtn" data-step="2"><span class="num">2</span><span><span class="lab">Pick parts</span><span class="sub">Choose what moves</span></span></button>
@@ -167,12 +191,17 @@ footer{max-width:1180px;margin:0 auto;padding:0 20px 34px;color:var(--muted);fon
           </div>
 
           <div class="panelpage" data-panel="2">
-            <p class="hint">Click parts to select them — effects apply to selected parts only. For draw-on, parts reveal in list order.</p>
+            <p class="hint">Tap parts right in the preview — selected parts glow purple, the rest dim. Group parts to shrink a long list into a few units.</p>
             <div class="row" style="margin-bottom:10px">
               <button class="btn" id="selAll">All</button>
               <button class="btn" id="selNone">None</button>
               <span style="color:var(--muted);font-size:13px" id="selInfo"></span>
             </div>
+            <div class="row" style="margin-bottom:6px">
+              <input type="text" id="groupName" placeholder="Group name (optional)" style="flex:1;min-width:130px;border:1px solid var(--line);border-radius:10px;padding:8px 10px;font:inherit;font-size:13.5px">
+              <button class="btn" id="groupBtn" title="Turn the selected parts into one group">Group selected</button>
+            </div>
+            <div class="groups" id="groupsList"></div>
             <div class="els" id="els"><p class="hint">Parts appear here once an SVG is loaded.</p></div>
             <hr class="divider">
             <p class="subttl">Recolor</p>
@@ -186,8 +215,10 @@ footer{max-width:1180px;margin:0 auto;padding:0 20px 34px;color:var(--muted);fon
           </div>
 
           <div class="panelpage" data-panel="3">
-            <p class="hint">Pick an effect, tune it, apply. Effects stack — apply as many as you like.</p>
+            <p class="hint">Pick an effect and apply it. That's it — timing and other options stay tucked away until you want them.</p>
             <div class="presets" id="presets"></div>
+            <button class="btn ghost" id="tuneToggle" style="padding-left:2px">Timing &amp; options ▾</button>
+            <div id="tuneBox" hidden>
             <div class="ctl">
               <label>Duration <output id="durOut">1.5s</output></label>
               <input type="range" id="dur" min="0.2" max="6" step="0.1" value="1.5">
@@ -222,6 +253,7 @@ footer{max-width:1180px;margin:0 auto;padding:0 20px 34px;color:var(--muted);fon
             <div class="ctl" id="morphCtl" style="display:none">
               <label>Morph target — a path <span class="kbd">d</span> with the same commands as the original</label>
               <textarea id="morphTo" style="min-height:56px" spellcheck="false" placeholder="M100,20 L130,90 L70,90 Z"></textarea>
+            </div>
             </div>
             <button class="btn primary wide" id="applyBtn" style="margin-top:12px">Apply effect to selected parts</button>
             <div class="applied" id="applied"></div>
@@ -275,6 +307,7 @@ const SEL="path,circle,rect,ellipse,line,polyline,polygon,text";
 const SVGNS="http://www.w3.org/2000/svg";
 let original=null, info=[], lengths={}, selected=new Set(), animations=[], aid=0;
 let curPreset="draw", curLoop="infinite", curStep=1;
+let groups=[], expandedGroups=new Set(), gid=0;
 
 const ICONS={
  draw:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20c4-1 3-3 6-6l8-8a2.1 2.1 0 0 0-3-3l-8 8c-3 3-2 2-3 9z"/><path d="M13.5 6.5l3 3"/></svg>',
@@ -293,7 +326,7 @@ const PRESETS=[
 ];
 const STEPHINTS={
  1:"<b>Step 1 — Add an SVG.</b> Paste code, upload a file, or use the sample (already loaded).",
- 2:"<b>Step 2 — Pick parts.</b> Selected parts are highlighted in the list. Only they will move.",
+ 2:"<b>Step 2 — Pick parts.</b> Tap parts in this preview — selected parts glow purple, the rest dim. Grouping shrinks long lists.",
  3:"<b>Step 3 — Add motion.</b> Apply an effect and watch the preview. Stack as many as you like.",
  4:"<b>Step 4 — Export.</b> Copy the code or download the file. It works anywhere SVGs work."
 };
@@ -331,6 +364,14 @@ function updateStates(){
   $("exportSummary").textContent=animations.length?
     animations.length+(animations.length===1?" effect":" effects")+" applied — your finished, self-contained file is ready:":
     "Nothing to export yet — add an effect in step 3 and your finished file appears here.";
+  const names={1:"Add an SVG",2:"Pick parts",3:"Add motion",4:"Export"};
+  $("drawerTitle").textContent="Step "+curStep+" — "+names[curStep];
+  $("drawerSummary").textContent=original?(info.length+" parts · "+selected.size+" selected · "+animations.length+(animations.length===1?" effect":" effects")):"";
+  fitDrawer();
+}
+function fitDrawer(){
+  const d=$("drawer");if(!d)return;
+  document.body.style.paddingBottom=(d.offsetHeight+22)+"px";
 }
 function showStep(n){
   curStep=n;
@@ -343,13 +384,14 @@ function showView(v){
   $("viewGallery").hidden=v!=="gallery";
   $("tabCreate").classList.toggle("on",v==="create");
   $("tabGallery").classList.toggle("on",v==="gallery");
+  fitDrawer();
 }
 function loadSVG(text){
   const doc=new DOMParser().parseFromString(text,"image/svg+xml");
   if(doc.querySelector("parsererror")||!doc.querySelector("svg")){$("srcErr").textContent="That doesn't parse as an SVG — check the code and try again.";return false;}
   const svg=doc.querySelector("svg");sanitize(svg);
   if(!svg.getAttribute("xmlns"))svg.setAttribute("xmlns",SVGNS);
-  original=svg;info=[];lengths={};selected=new Set();animations=[];
+  original=svg;info=[];lengths={};selected=new Set();animations=[];groups=[];expandedGroups=new Set();
   svg.querySelectorAll(SEL).forEach((el,i)=>{
     info.push({tag:el.tagName.toLowerCase(),fill:el.getAttribute("fill")||"",stroke:el.getAttribute("stroke")||"",d:el.getAttribute("d")||""});
     selected.add(i);
@@ -362,18 +404,51 @@ function loadSVG(text){
   updateStates();
   return true;
 }
-function renderEls(){
-  const box=$("els");
-  if(!info.length){box.innerHTML='<p class="hint">Parts appear here once an SVG is loaded.</p>';$("selInfo").textContent="";updateStates();return;}
-  box.innerHTML="";
-  info.forEach((p,i)=>{
-    const b=document.createElement("button");b.className="el"+(selected.has(i)?" sel":"");
-    const col=p.fill&&p.fill!=="none"?p.fill:(p.stroke&&p.stroke!=="none"?p.stroke:"#ccccdd");
-    b.innerHTML='<span class="tag">'+esc(p.tag)+'</span><span>Part '+(i+1)+'</span><span class="dot" style="background:'+esc(col)+'"></span><span class="meta">'+(lengths[i]?"len "+Math.round(lengths[i]):"")+'</span>';
-    b.title="Select / deselect this part";
-    b.onclick=()=>{selected.has(i)?selected.delete(i):selected.add(i);renderEls();};
-    box.appendChild(b);
+function stageEl(i){const s=$("stage").querySelector("svg");return s?s.querySelectorAll(SEL)[i]:null;}
+function togglePart(i){selected.has(i)?selected.delete(i):selected.add(i);renderEls();updatePreview();}
+function paintSelection(){
+  const s=$("stage").querySelector("svg");if(!s)return;
+  s.querySelectorAll(SEL).forEach((el,i)=>{
+    el.classList.toggle("hili",selected.has(i));
+    el.classList.toggle("dim",selected.size>0&&selected.size<info.length&&!selected.has(i));
   });
+}
+function partRow(i){
+  const p=info[i];
+  const b=document.createElement("button");b.className="el"+(selected.has(i)?" sel":"");
+  const col=p.fill&&p.fill!=="none"?p.fill:(p.stroke&&p.stroke!=="none"?p.stroke:"#ccccdd");
+  b.innerHTML='<span class="tag">'+esc(p.tag)+'</span><span>Part '+(i+1)+'</span><span class="dot" style="background:'+esc(col)+'"></span><span class="meta">'+(lengths[i]?"len "+Math.round(lengths[i]):"")+'</span>';
+  b.title="Select / deselect this part";
+  b.onclick=()=>togglePart(i);
+  b.onmouseenter=()=>{const e=stageEl(i);if(e)e.classList.add("hili");};
+  b.onmouseleave=()=>paintSelection();
+  return b;
+}
+function renderEls(){
+  const box=$("els"),gbox=$("groupsList");
+  if(!info.length){box.innerHTML='<p class="hint">Parts appear here once an SVG is loaded.</p>';gbox.innerHTML="";$("selInfo").textContent="";updateStates();return;}
+  gbox.innerHTML="";
+  const grouped=new Set();groups.forEach(g=>g.members.forEach(m=>grouped.add(m)));
+  groups.forEach(g=>{
+    const row=document.createElement("div");row.className="grow";
+    const allSel=g.members.length>0&&g.members.every(m=>selected.has(m));
+    row.innerHTML='<span class="gname">'+esc(g.name)+'</span><span class="gcount">'+g.members.length+' parts'+(allSel?" · selected":"")+'</span>';
+    const sel=document.createElement("button");sel.className="btn gbtn";sel.textContent=allSel?"Selected ✓":"Select";
+    sel.title="Select exactly this group's parts";
+    sel.onclick=()=>{selected=new Set(g.members);renderEls();updatePreview();};
+    const exp=document.createElement("button");exp.className="iconbtn";exp.style.marginLeft="0";exp.textContent=expandedGroups.has(g.id)?"▾":"▸";exp.title="Show / hide the parts in this group";
+    exp.onclick=()=>{expandedGroups.has(g.id)?expandedGroups.delete(g.id):expandedGroups.add(g.id);renderEls();};
+    const un=document.createElement("button");un.className="iconbtn";un.style.marginLeft="0";un.textContent="✕";un.title="Ungroup (the parts stay, the group goes away)";
+    un.onclick=()=>{groups=groups.filter(x=>x.id!==g.id);renderEls();updatePreview();};
+    row.appendChild(sel);row.appendChild(exp);row.appendChild(un);
+    gbox.appendChild(row);
+    const members=document.createElement("div");members.className="gmembers"+(expandedGroups.has(g.id)?" open":"");
+    g.members.forEach(m=>members.appendChild(partRow(m)));
+    gbox.appendChild(members);
+  });
+  box.innerHTML="";
+  info.forEach((p,i)=>{if(!grouped.has(i))box.appendChild(partRow(i));});
+  if(grouped.size&&box.children.length===0)box.innerHTML='<p class="hint" style="margin:0">All parts are grouped — expand a group above to see its parts.</p>';
   $("selInfo").textContent=selected.size+" selected";
   updateStates();
 }
@@ -431,6 +506,9 @@ function updatePreview(){
   if(!original)return;
   $("stage").innerHTML=buildString();
   $("out").value=animations.length?buildString():"";
+  const s=$("stage").querySelector("svg");
+  if(s)s.querySelectorAll(SEL).forEach((el,i)=>{el.setAttribute("data-part",i);el.addEventListener("click",()=>togglePart(i));});
+  paintSelection();
   updateStates();
 }
 function renderApplied(){
@@ -460,6 +538,26 @@ $("tabCreate").onclick=()=>showView("create");
 $("tabGallery").onclick=()=>showView("gallery");
 $("startOver").onclick=()=>{animations=[];renderApplied();updatePreview();showStep(1);toast("Effects cleared — load a new SVG in step 1");};
 
+/* drawer */
+const drawerEl=$("drawer");
+function setDrawer(open){drawerEl.classList.toggle("closed",!open);$("drawerToggle").textContent=open?"▾":"▴";fitDrawer();}
+$("drawerHead").onclick=()=>setDrawer(drawerEl.classList.contains("closed"));
+window.addEventListener("resize",fitDrawer);
+
+/* timing & options — hidden until wanted, or until the chosen effect needs them */
+function setTune(open){$("tuneBox").hidden=!open;$("tuneToggle").textContent=open?"Timing & options ▴":"Timing & options ▾";fitDrawer();}
+$("tuneToggle").onclick=()=>setTune($("tuneBox").hidden);
+
+/* groups */
+$("groupBtn").onclick=()=>{
+  if(selected.size<2){toast("Pick at least 2 parts to make a group — tap them in the preview");return;}
+  const name=$("groupName").value.trim()||("Group "+(groups.length+1));
+  groups.push({id:++gid,name:name,members:[...selected].sort((a,b)=>a-b)});
+  $("groupName").value="";
+  renderEls();updatePreview();
+  toast(name+" created — the list just got shorter");
+};
+
 /* presets + controls */
 const presetsBox=$("presets");
 PRESETS.forEach(([key,label])=>{
@@ -467,7 +565,8 @@ PRESETS.forEach(([key,label])=>{
   b.innerHTML=ICONS[key]+"<span>"+label+"</span>";b.title=label;
   b.onclick=()=>{curPreset=key;presetsBox.querySelectorAll(".preset").forEach(x=>x.classList.toggle("on",x.dataset.preset===key));
     $("colorCtl").style.display=key==="colorfade"?"block":"none";
-    $("morphCtl").style.display=key==="morph"?"block":"none";};
+    $("morphCtl").style.display=key==="morph"?"block":"none";
+    if(key==="colorfade"||key==="morph")setTune(true);};
   presetsBox.appendChild(b);
 });
 $("dur").oninput=e=>$("durOut").textContent=(+e.target.value).toFixed(1)+"s";
