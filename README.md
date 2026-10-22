@@ -1,26 +1,31 @@
 # SVG Factory
 
-Animate any SVG — no code to write.
+**Live:** https://icekiller333.github.io/animated-svgs/
 
-**SVG Factory** is a free, single-page tool: paste or upload an SVG, pick the parts, apply preset animations with sliders, then copy the code or download a self-contained animated `.svg` file.
+Two tools in one page:
 
-Exports contain only CSS / SMIL animation baked inside the SVG itself — no scripts, no external files — so they play wherever SVG images play: as an `<img>`, inline in HTML, and in Rise, Storyline, and D2L (Storyline best-effort).
+## Icon Gallery (the front door)
+Free black-line SVG icons to pull into your projects. Search by name/tag/set, filter by tag,
+view the **latest 20 (Newest)** or browse **grouped by set** (Cyberpunk, Basics, Snacks,
+Nature, Objects). Every icon: **Copy SVG** or **Download** right on the card. Icons with a
+signature animation offer it as a second version (Shape / Animated toggle). **Animate it**
+hands any icon to the Animator.
 
-## Features
+## Animator
+A single-screen, Figma-style studio — canvas on the left, inspector on the right
+(sticky canvas on mobile). No wizard, no steps:
 
-- **Input:** paste SVG code, upload a file, drag-and-drop, or start from the built-in sample
-- **Part picker:** select individual shapes/paths and animate one or many at once
-- **Draw-on:** select strokes, set the reveal order and speed
-- **Effects:** draw-on, fade, pulse, spin, bounce, slide-in, wiggle, color fade, and path morph (SMIL), with duration, delay, easing, and loop/once controls
-- **Recolor:** set fill/stroke colors on selected parts
-- **Output:** copy the animated SVG code, or download the `.svg` file
-- **Guided flow:** four steps — Add an SVG → Pick parts → Add motion → Export — with one control panel at a time and a live preview throughout
-- **Gallery:** curated shapes. The plain shape is the default for every item (copy or download as-is, or load it into the tool and animate it yourself); a shape with a unique/signature animation also offers that animated version
+- **SVG** — paste code, upload, or use the sample; collapses to a one-line bar once loaded.
+- **Parts** — tap parts in the canvas (selected glow purple, the rest dim); named groups
+  collapse long lists and animate as one unit.
+- **Effect** — 7 basic animations as tiles that preview their motion: **Draw on** (one click —
+  the tool works out the stroke order itself), Fade, Pulse, Spin, Bounce, Slide, Wiggle.
+  One speed slider + Loop/Once; delay and easing live under "More options."
+- **Export** — copy the code or download the file, always at the bottom of the panel.
 
-## Use it
+Exports are **one self-contained .svg with pure CSS animation inside the file** — no
+JavaScript, no SMIL, nothing external — so they play wherever SVG images play: `<img>` tags,
+HTML pages, Rise, Storyline (best effort), D2L.
 
-Open `index.html` in a browser, or serve this repo with GitHub Pages.
-
-## Adding to the gallery
-
-Gallery items are defined in the `GALLERY` array in `index.html` — add an entry with a title, a one-line description, and a `shape` SVG string (the plain shape is required and is the default). If the shape has a signature animation, add `sigName` and a `sig` string with that self-contained animated version, then push.
+Design rationale: `DESIGN-BRIEF-v4.md` (information theory / UX research + decisions).
+Single file: `index.html`. Standalone gallery files live in `gallery/`.

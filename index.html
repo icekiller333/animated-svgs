@@ -24,19 +24,7 @@ h1{font-size:26px;margin:0;letter-spacing:-.5px}
 .viewtabs button.on{background:#fff;color:var(--ink);box-shadow:0 2px 8px rgba(25,25,60,.12)}
 main{max-width:1180px;margin:0 auto;padding:14px 20px 40px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
-.studio{display:grid;grid-template-columns:1fr;gap:16px;align-items:start}
-.panel{padding:10px 16px 16px;position:fixed;left:50%;transform:translateX(-50%);bottom:10px;width:min(1160px,calc(100% - 20px));max-height:54vh;overflow-y:auto;z-index:40}
-.panel .stepbtn .sub{display:none}
-.panel.closed{overflow:hidden}
-.panel.closed .stepper,.panel.closed .panelbody{display:none}
-.drawerhead{display:flex;align-items:center;gap:10px;padding:6px 2px 10px;cursor:pointer;user-select:none}
 .grip{width:42px;height:5px;border-radius:99px;background:#d8d8ea;flex:0 0 auto;margin:0 auto;position:absolute;left:50%;transform:translateX(-50%);top:6px}
-.drawerhead .dttl{font-weight:800;font-size:14.5px}
-.drawerhead .dsum{color:var(--muted);font-size:12.5px}
-.drawerhead .chev{margin-left:auto;font-size:16px;color:var(--muted);border:0;background:transparent;cursor:pointer;padding:4px 8px}
-.stepper{display:flex;flex-direction:row;flex-wrap:wrap;gap:4px;margin-bottom:6px}
-.stepbtn{flex:1;min-width:120px}
-.stepbtn .sub{display:none}
 .stage svg .hili{stroke:var(--accent)!important;filter:drop-shadow(0 0 5px rgba(108,77,255,.95))}
 .stage svg .dim{opacity:.28}
 .stage svg [data-part]{cursor:pointer}
@@ -47,17 +35,7 @@ main{max-width:1180px;margin:0 auto;padding:14px 20px 40px}
 .grow .gbtn{margin-left:auto}
 .gmembers{display:none;flex-direction:column;gap:6px;margin:0 0 4px 18px}
 .gmembers.open{display:flex}
-.stepbtn{display:flex;align-items:center;gap:11px;width:100%;text-align:left;border:0;background:transparent;font:inherit;padding:9px 10px;border-radius:12px;cursor:pointer;transition:background .13s}
-.stepbtn:hover{background:#f6f6fc}
-.stepbtn.on{background:var(--accent-soft)}
-.stepbtn .num{width:27px;height:27px;border-radius:50%;border:2px solid #cfcfe4;color:var(--muted);font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;flex:0 0 auto;background:#fff;transition:all .15s}
-.stepbtn.on .num{border-color:var(--accent);color:var(--accent)}
-.stepbtn.done .num{border-color:var(--good);background:var(--good);color:#fff}
-.stepbtn .lab{font-weight:700;font-size:14.5px}
-.stepbtn .sub{color:var(--muted);font-size:12px;display:block;font-weight:400}
 .panelbody{border-top:1px solid var(--line);padding-top:14px;margin-top:6px}
-.panelpage{display:none}
-.panelpage.on{display:block;animation:fadein .18s ease}
 @keyframes fadein{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 .hint{color:var(--muted);font-size:13px;margin:0 0 12px;line-height:1.45}
 textarea{width:100%;min-height:110px;border:1px solid var(--line);border-radius:12px;padding:10px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;resize:vertical;background:#fbfbfe}
@@ -77,8 +55,6 @@ textarea:focus,input:focus,select:focus{outline:2px solid var(--accent);outline-
 .drop{border:1.5px dashed #c9c9e4;border-radius:12px;padding:11px;text-align:center;color:var(--muted);font-size:13px;margin-top:10px;transition:border-color .15s,background .15s}
 .drop.over{border-color:var(--accent);background:var(--accent-soft);color:var(--ink)}
 .err{color:#c2255c;font-size:13px;min-height:18px;margin-top:8px}
-.stagecard{padding:16px;position:sticky;top:14px}
-@media(max-width:900px){.stagecard{position:static}}
 .stagetoolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
 .stagetoolbar .ttl{font-weight:800;font-size:15px;margin-right:2px}
 .chip{font-size:12px;font-weight:700;background:#eeeef7;color:var(--muted);border-radius:999px;padding:4px 10px}
@@ -135,7 +111,10 @@ section.viewhead p{color:var(--muted);margin:0 0 14px;font-size:14px}
 .gtoggle button{flex:1;border:0;background:transparent;font:inherit;font-size:12px;font-weight:700;padding:5px 4px;border-radius:7px;cursor:pointer;color:var(--muted)}
 .gtoggle button.on{background:#fff;color:var(--ink);box-shadow:0 1px 5px rgba(25,25,60,.14)}
 .gact{margin-top:auto;display:flex;flex-direction:column;gap:7px}
-.tagchips{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 2px}
+.gsearch{margin-top:16px}
+.gsearch input{width:100%;max-width:520px;border:1.5px solid var(--line);border-radius:999px;padding:11px 18px;font:inherit;font-size:14.5px;background:#fff;color:var(--ink)}
+.gsearch input:focus{outline:none;border-color:var(--accent)}
+.tagchips{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 2px}
 .tchip{border:1.5px solid var(--line);background:#fff;color:var(--ink);border-radius:999px;padding:6px 13px;font:inherit;font-size:13px;font-weight:700;cursor:pointer}
 .tchip:hover{border-color:var(--accent)}
 .tchip.on{background:var(--accent);border-color:var(--accent);color:#fff}
@@ -150,10 +129,32 @@ footer{max-width:1180px;margin:0 auto;padding:0 20px 34px;color:var(--muted);fon
 .kbd{font-family:ui-monospace,Menlo,monospace;background:#eeeef7;border-radius:5px;padding:1px 6px;font-size:12px}
 [hidden]{display:none!important}
 /* v3.1 — one unified widget: preview on top, controls below, nothing floats */
-.studio{display:flex;flex-direction:column;gap:0;background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);overflow:hidden}
-.stagecard{order:1;position:static;border:0;box-shadow:none;border-radius:0;border-bottom:1px solid var(--line)}
-.panel{order:2;position:static;transform:none;left:auto;bottom:auto;width:auto;max-height:none;overflow:visible;border:0;box-shadow:none;border-radius:0;background:#fbfbfe;z-index:auto;padding:16px}
-.panel.closed .stepper,.panel.closed .panelbody{display:block}
+.studio{display:grid;grid-template-columns:minmax(0,1fr) 400px;background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);overflow:hidden;align-items:start}
+.stagecard{position:sticky;top:14px;border:0;box-shadow:none;border-radius:0;padding:16px}
+.panel{position:static;transform:none;left:auto;bottom:auto;width:auto;max-height:none;overflow:visible;border:0;box-shadow:none;border-radius:0;background:#fbfbfe;z-index:auto;padding:0;border-left:1px solid var(--line)}
+.sect{padding:16px 18px;border-top:1px solid var(--line)}
+.sect:first-child{border-top:0}
+.secttl{font-size:12.5px;font-weight:800;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin:0 0 10px}
+.srcbar{display:flex;align-items:center;gap:10px;font-size:13.5px;font-weight:600}
+.srcbar .btn{margin-left:auto;flex:0 0 auto}
+.gsettl{font-size:19px;font-weight:800;margin:28px 0 10px}
+.gmodes{display:flex;gap:8px;margin-top:14px}
+@keyframes pvPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.22)}}
+@keyframes pvSpin{to{transform:rotate(360deg)}}
+@keyframes pvBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes pvSlide{0%,100%{transform:translateX(-3px)}50%{transform:translateX(3px)}}
+@keyframes pvFade{0%,100%{opacity:1}50%{opacity:.12}}
+@keyframes pvWiggle{0%,100%{transform:rotate(-9deg)}50%{transform:rotate(9deg)}}
+@keyframes pvDraw{from{stroke-dashoffset:64}to{stroke-dashoffset:0}}
+.preset svg{transform-origin:center;overflow:visible}
+.preset[data-preset="pulse"]:hover svg,.preset[data-preset="pulse"].on svg{animation:pvPulse .8s ease-in-out infinite}
+.preset[data-preset="spin"]:hover svg,.preset[data-preset="spin"].on svg{animation:pvSpin 1.4s linear infinite}
+.preset[data-preset="bounce"]:hover svg,.preset[data-preset="bounce"].on svg{animation:pvBounce .7s ease-in-out infinite}
+.preset[data-preset="slide"]:hover svg,.preset[data-preset="slide"].on svg{animation:pvSlide .9s ease-in-out infinite}
+.preset[data-preset="fade"]:hover svg,.preset[data-preset="fade"].on svg{animation:pvFade 1.2s ease-in-out infinite}
+.preset[data-preset="wiggle"]:hover svg,.preset[data-preset="wiggle"].on svg{animation:pvWiggle .6s ease-in-out infinite}
+.preset[data-preset="draw"]:hover svg path,.preset[data-preset="draw"].on svg path{stroke-dasharray:64;animation:pvDraw 1.1s linear infinite}
+@media(max-width:900px){.studio{grid-template-columns:1fr}.panel{border-left:0;border-top:1px solid var(--line)}.stagecard{position:static}}
 /* mobile: preview frozen at the top, settings scroll underneath; steps become a tab bar stuck under the preview */
 @media(max-width:760px){
   .studio{overflow:visible}
@@ -162,9 +163,6 @@ footer{max-width:1180px;margin:0 auto;padding:0 20px 34px;color:var(--muted);fon
   .stage{min-height:0;padding:10px}
   .stage svg{max-height:32vh}
   .panel{border-radius:0 0 20px 20px}
-  .stepper{position:sticky;top:var(--stageH,290px);z-index:29;background:#fbfbfe;padding:10px 0 8px;margin-bottom:4px}
-  .stepbtn{min-width:0;flex:1 1 0;padding:8px 2px;font-size:12px;gap:5px}
-  .stepbtn .num{width:20px;height:20px;flex:0 0 20px;font-size:11px}
 }
 </style>
 </head>
@@ -175,26 +173,37 @@ footer{max-width:1180px;margin:0 auto;padding:0 20px 34px;color:var(--muted);fon
   </div>
   <div>
     <h1>SVG Factory</h1>
-    <p class="tag">Animate any SVG. Copy it. Ship it.</p>
+    <p class="tag">Free SVG icons for your projects — plus a simple animator.</p>
   </div>
   <nav class="viewtabs" aria-label="Views">
-    <button id="tabCreate" class="on">Create</button>
-    <button id="tabGallery">Gallery</button>
+    <button id="tabGallery" class="on">Icon Gallery</button>
+    <button id="tabCreate">Animator</button>
   </nav>
 </header>
 <main>
   <div id="viewCreate">
     <div class="studio">
-      <div class="card panel" id="drawer">
-        <div class="stepper" role="tablist" aria-label="Steps">
-          <button class="stepbtn on" data-step="1"><span class="num">1</span><span><span class="lab">Add an SVG</span><span class="sub">Paste, upload, or sample</span></span></button>
-          <button class="stepbtn" data-step="2"><span class="num">2</span><span><span class="lab">Pick parts</span><span class="sub">Choose what moves</span></span></button>
-          <button class="stepbtn" data-step="3"><span class="num">3</span><span><span class="lab">Add motion</span><span class="sub">Effects, tuned by sliders</span></span></button>
-          <button class="stepbtn" data-step="4"><span class="num">4</span><span><span class="lab">Export</span><span class="sub">Copy or download the file</span></span></button>
+      <div class="card stagecard">
+        <div class="stagetoolbar">
+          <span class="ttl">Preview</span>
+          <span class="chip" id="chipSel">No SVG loaded</span>
+          <span class="chip" id="chipFx">0 effects</span>
+          <span class="sp"></span>
+          <button class="btn" id="replayBtn">↻ Replay</button>
         </div>
-        <div class="panelbody">
-          <div class="panelpage on" data-panel="1">
-            <p class="hint">Paste SVG code, upload a file, or try the sample. It loads into the preview automatically.</p>
+        <div class="stage" id="stage"><div class="empty">Nothing loaded yet.<br>Load the sample to see it in action.</div></div>
+        <p class="stagehint" id="stageHint"><b>Parts</b> — tap parts in the preview to select them, then pick an effect in the panel.</p>
+      </div>
+
+      <div class="card panel" id="inspector">
+        <section class="sect" id="srcSect">
+          <h3 class="secttl">SVG</h3>
+          <div class="srcbar" id="srcBar" hidden>
+            <span id="srcBarTxt">Sample loaded</span>
+            <button class="btn" id="srcChange">Change</button>
+          </div>
+          <div id="srcBody">
+            <p class="hint">Paste SVG code, upload a file, or try the sample.</p>
             <textarea id="src" spellcheck="false" placeholder="Paste &lt;svg&gt;…&lt;/svg&gt; code here"></textarea>
             <div class="row" style="margin-top:10px">
               <button class="btn primary" id="loadBtn">Load pasted code</button>
@@ -205,119 +214,96 @@ footer{max-width:1180px;margin:0 auto;padding:0 20px 34px;color:var(--muted);fon
             <div class="drop" id="drop">…or drop an .svg file here</div>
             <div class="err" id="srcErr"></div>
             <p class="hint" id="sizeInfo" style="margin:4px 0 0"></p>
-            <div class="nextrow"><button class="btn primary wide" data-goto="2">Next: Pick parts →</button></div>
           </div>
+        </section>
 
-          <div class="panelpage" data-panel="2">
-            <p class="hint">Tap parts right in the preview — selected parts glow purple, the rest dim. Group parts to shrink a long list into a few units.</p>
-            <div class="row" style="margin-bottom:10px">
-              <button class="btn" id="selAll">All</button>
-              <button class="btn" id="selNone">None</button>
-              <span style="color:var(--muted);font-size:13px" id="selInfo"></span>
-            </div>
-            <div class="row" style="margin-bottom:6px">
-              <input type="text" id="groupName" placeholder="Group name (optional)" style="flex:1;min-width:130px;border:1px solid var(--line);border-radius:10px;padding:8px 10px;font:inherit;font-size:13.5px">
-              <button class="btn" id="groupBtn" title="Turn the selected parts into one group">Group selected</button>
-            </div>
-            <div class="groups" id="groupsList"></div>
-            <div class="els" id="els"><p class="hint">Parts appear here once an SVG is loaded.</p></div>
-            <hr class="divider">
-            <p class="subttl">Recolor</p>
-            <p class="subhint">A permanent color change — not an animation.</p>
-            <div class="row">
-              <input type="color" id="fillColor" value="#ff5c8a">
-              <button class="btn" id="applyFill">Set fill</button>
-              <button class="btn" id="applyStroke">Set stroke</button>
-            </div>
-            <div class="nextrow"><button class="btn primary wide" data-goto="3">Next: Add motion →</button></div>
+        <section class="sect" id="partsSect">
+          <h3 class="secttl">Parts</h3>
+          <p class="hint">Tap parts in the preview — selected parts glow purple, the rest dim. Group parts to shrink a long list into a few units that move as one.</p>
+          <div class="row" style="margin-bottom:10px">
+            <button class="btn" id="selAll">All</button>
+            <button class="btn" id="selNone">None</button>
+            <span style="color:var(--muted);font-size:13px" id="selInfo"></span>
           </div>
+          <div class="row" style="margin-bottom:6px">
+            <input type="text" id="groupName" placeholder="Group name (optional)" style="flex:1;min-width:130px;border:1px solid var(--line);border-radius:10px;padding:8px 10px;font:inherit;font-size:13.5px">
+            <button class="btn" id="groupBtn" title="Turn the selected parts into one group">Group selected</button>
+          </div>
+          <div class="groups" id="groupsList"></div>
+          <div class="els" id="els"><p class="hint">Parts appear here once an SVG is loaded.</p></div>
+        </section>
 
-          <div class="panelpage" data-panel="3">
-            <p class="hint">Pick an effect and apply it. That's it — timing and other options stay tucked away until you want them.</p>
-            <div class="presets" id="presets"></div>
-            <button class="btn ghost" id="tuneToggle" style="padding-left:2px">Timing &amp; options ▾</button>
-            <div id="tuneBox" hidden>
-            <div class="ctl">
-              <label>Duration <output id="durOut">1.5s</output></label>
-              <input type="range" id="dur" min="0.2" max="6" step="0.1" value="1.5">
+        <section class="sect" id="fxSect">
+          <h3 class="secttl">Effect</h3>
+          <p class="hint">Basic CSS animations — pick one and apply it. Draw-on figures out the stroke order itself.</p>
+          <div class="presets" id="presets"></div>
+          <div class="ctl">
+            <label>Speed <output id="durOut">1.5s</output></label>
+            <input type="range" id="dur" min="0.2" max="6" step="0.1" value="1.5">
+          </div>
+          <div style="margin-bottom:4px">
+            <div style="font-size:13px;font-weight:600;margin-bottom:5px">Repeat</div>
+            <div class="switch" id="loopSwitch">
+              <button data-loop="infinite" class="on">Loop</button>
+              <button data-loop="1">Once</button>
             </div>
+          </div>
+          <button class="btn ghost" id="tuneToggle" style="padding-left:2px">More options ▾</button>
+          <div id="tuneBox" hidden>
             <div class="ctl">
               <label>Delay <output id="delayOut">0s</output></label>
               <input type="range" id="delay" min="0" max="3" step="0.1" value="0">
             </div>
-            <div class="row" style="justify-content:space-between">
-              <div>
-                <div style="font-size:13px;font-weight:600;margin-bottom:5px">Repeat</div>
-                <div class="switch" id="loopSwitch">
-                  <button data-loop="infinite" class="on">Loop</button>
-                  <button data-loop="1">Once</button>
-                </div>
-              </div>
-              <div>
-                <div style="font-size:13px;font-weight:600;margin-bottom:5px">Easing</div>
-                <select id="easing">
-                  <option value="ease">Ease</option>
-                  <option value="ease-in-out" selected>Ease in-out</option>
-                  <option value="ease-out">Ease out</option>
-                  <option value="linear">Linear</option>
-                  <option value="cubic-bezier(.34,1.56,.64,1)">Bouncy</option>
-                </select>
-              </div>
+            <div>
+              <div style="font-size:13px;font-weight:600;margin-bottom:5px">Easing</div>
+              <select id="easing">
+                <option value="ease">Ease</option>
+                <option value="ease-in-out" selected>Ease in-out</option>
+                <option value="ease-out">Ease out</option>
+                <option value="linear">Linear</option>
+                <option value="cubic-bezier(.34,1.56,.64,1)">Bouncy</option>
+              </select>
             </div>
-            <div class="ctl" id="colorCtl" style="display:none">
-              <label>Fade to this color</label>
-              <input type="color" id="toColor" value="#6c4dff">
-            </div>
-            <div class="ctl" id="morphCtl" style="display:none">
-              <label>Morph target — a path <span class="kbd">d</span> with the same commands as the original</label>
-              <textarea id="morphTo" style="min-height:56px" spellcheck="false" placeholder="M100,20 L130,90 L70,90 Z"></textarea>
-            </div>
-            </div>
-            <button class="btn primary wide" id="applyBtn" style="margin-top:12px">Apply effect to selected parts</button>
-            <div class="applied" id="applied"></div>
-            <div class="row" style="margin-top:10px">
-              <button class="btn ghost" id="clearAnims">Clear all effects</button>
-            </div>
-            <div class="nextrow"><button class="btn primary wide" data-goto="4">Next: Export →</button></div>
           </div>
-
-          <div class="panelpage" data-panel="4">
-            <p class="hint" id="exportSummary">Apply an effect and your finished file appears here.</p>
-            <textarea class="outbox" id="out" readonly spellcheck="false" placeholder="Your animated SVG code appears here"></textarea>
-            <div style="height:10px"></div>
-            <button class="btn primary wide" id="copyBtn">Copy the code</button>
-            <div style="height:8px"></div>
-            <button class="btn pink wide" id="dlBtn">Download the .svg file</button>
-            <p class="hint" style="margin-top:12px">One self-contained file — no scripts, no links. Works as an <span class="kbd">&lt;img&gt;</span>, inline in HTML, and in Rise, Storyline, and D2L.</p>
-            <div class="nextrow"><button class="btn ghost" id="startOver">Start over with a new SVG</button></div>
+          <button class="btn primary wide" id="applyBtn" style="margin-top:12px">Apply to selected parts</button>
+          <div class="applied" id="applied"></div>
+          <div class="row" style="margin-top:10px">
+            <button class="btn ghost" id="clearAnims">Clear all effects</button>
           </div>
-        </div>
-      </div>
+        </section>
 
-      <div class="card stagecard">
-        <div class="stagetoolbar">
-          <span class="ttl">Preview</span>
-          <span class="chip" id="chipSel">No SVG loaded</span>
-          <span class="chip" id="chipFx">0 effects</span>
-          <span class="sp"></span>
-          <button class="btn" id="replayBtn">↻ Replay</button>
-        </div>
-        <div class="stage" id="stage"><div class="empty">Nothing loaded yet.<br>Load the sample to see it in action.</div></div>
-        <p class="stagehint" id="stageHint"><b>Step 1 —</b> add an SVG. The sample is already loaded, so you can jump straight to step 2.</p>
+        <section class="sect" id="exportSect">
+          <h3 class="secttl">Export</h3>
+          <p class="hint" id="exportSummary">Apply an effect and your finished file is ready to copy or download.</p>
+          <div class="row">
+            <button class="btn primary" id="copyBtn" style="flex:1">Copy the code</button>
+            <button class="btn pink" id="dlBtn" style="flex:1">Download .svg</button>
+          </div>
+          <button class="btn ghost" id="codeToggle" style="padding-left:2px;margin-top:6px">View code ▾</button>
+          <textarea class="outbox" id="out" readonly spellcheck="false" hidden placeholder="Your animated SVG code appears here"></textarea>
+          <p class="hint" style="margin-top:10px">One self-contained file — pure CSS animation, no scripts, no SMIL. Works as an <span class="kbd">&lt;img&gt;</span>, inline in HTML, and in Rise, Storyline, and D2L.</p>
+          <div class="row" style="margin-top:6px"><button class="btn ghost" id="startOver">Start over with a new SVG</button></div>
+        </section>
       </div>
     </div>
   </div>
 
   <section id="viewGallery" hidden>
     <div class="viewhead">
-      <h2>Gallery — shapes</h2>
-      <p>Every shape is free to copy or download as-is. Hit <b>Animate it</b> to load the shape into the tool and dial in any animation yourself. Shapes with a signature animation include it as a second version. Use the tag chips to filter the gallery.</p>
+      <h2>Icon Gallery</h2>
+      <p>Free SVG icons to pull into your projects — copy the code or download the file, no strings attached. Want one moving? Hit <b>Animate it</b> and the Animator adds a basic CSS animation. Search or filter by tag to find things fast.</p>
+    </div>
+    <div class="gsearch"><input type="search" id="gallerySearch" placeholder="Search icons — try “duck”, “food”, “cyberpunk”…" aria-label="Search icons"></div>
+    <div class="gmodes" role="group" aria-label="Gallery view">
+      <button class="tchip on" id="modeNewest">Newest</button>
+      <button class="tchip" id="modeSets">By set</button>
     </div>
     <div class="tagchips" id="tagChips"></div>
+    <p class="hint" id="galleryEmpty" hidden style="margin:18px 0">No icons match that — try a different search or tag.</p>
     <div class="gallery" id="galleryGrid"></div>
   </section>
 </main>
-<footer>SVG Factory — animations are baked into the file itself (CSS / SMIL inside the SVG), so they play wherever SVG images play.</footer>
+<footer>SVG Factory — animations are baked into the file itself (pure CSS inside the SVG), so they play wherever SVG images play.</footer>
 <div id="toast" role="status"></div>
 <script>
 "use strict";
@@ -325,7 +311,7 @@ const $=id=>document.getElementById(id);
 const SEL="path,circle,rect,ellipse,line,polyline,polygon,text";
 const SVGNS="http://www.w3.org/2000/svg";
 let original=null, info=[], lengths={}, selected=new Set(), animations=[], aid=0;
-let curPreset="draw", curLoop="infinite", curStep=1;
+let curPreset="draw", curLoop="infinite";
 let groups=[], expandedGroups=new Set(), gid=0;
 
 const ICONS={
@@ -341,14 +327,8 @@ const ICONS={
 };
 const PRESETS=[
  ["draw","Draw on"],["fade","Fade"],["pulse","Pulse"],["spin","Spin"],
- ["bounce","Bounce"],["slide","Slide in"],["wiggle","Wiggle"],["colorfade","Color fade"],["morph","Morph"]
+ ["bounce","Bounce"],["slide","Slide in"],["wiggle","Wiggle"]
 ];
-const STEPHINTS={
- 1:"<b>Step 1 — Add an SVG.</b> Paste code, upload a file, or use the sample (already loaded).",
- 2:"<b>Step 2 — Pick parts.</b> Tap parts in this preview — selected parts glow purple, the rest dim. Grouping shrinks long lists.",
- 3:"<b>Step 3 — Add motion.</b> Apply an effect and watch the preview. Stack as many as you like.",
- 4:"<b>Step 4 — Export.</b> Copy the code or download the file. It works anywhere SVGs work."
-};
 
 const SAMPLE='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 160" width="220" height="160">'
 +'<circle cx="58" cy="52" r="24" fill="#ffb703" stroke="#e07b00" stroke-width="3"/>'
@@ -370,25 +350,13 @@ function sanitize(root){
     if(/^on/i.test(a.name)||(/^(xlink:)?href$/i.test(a.name)&&/^\s*javascript:/i.test(a.value)))n.removeAttribute(a.name);});});
 }
 function updateStates(){
-  document.querySelectorAll(".stepbtn").forEach(b=>{
-    const s=+b.dataset.step;
-    b.classList.toggle("on",s===curStep);
-    b.classList.toggle("done",(s===1&&!!original)||(s===2&&selected.size>0)||(s===3&&animations.length>0));
-    if(b.classList.contains("done"))b.querySelector(".num").textContent="✓";else b.querySelector(".num").textContent=b.dataset.step;
-  });
   $("chipSel").textContent=original?selected.size+" of "+info.length+" parts selected":"No SVG loaded";
   $("chipSel").classList.toggle("hot",selected.size>0);
   $("chipFx").textContent=animations.length+(animations.length===1?" effect":" effects");
   $("chipFx").classList.toggle("hot",animations.length>0);
   $("exportSummary").textContent=animations.length?
     animations.length+(animations.length===1?" effect":" effects")+" applied — your finished, self-contained file is ready:":
-    "Nothing to export yet — add an effect in step 3 and your finished file appears here.";
-}
-function showStep(n){
-  curStep=n;
-  document.querySelectorAll(".panelpage").forEach(p=>p.classList.toggle("on",+p.dataset.panel===n));
-  $("stageHint").innerHTML=STEPHINTS[n];
-  updateStates();
+    "Apply an effect and your finished file is ready to copy or download.";
 }
 function showView(v){
   $("viewCreate").hidden=v!=="create";
@@ -396,7 +364,7 @@ function showView(v){
   $("tabCreate").classList.toggle("on",v==="create");
   $("tabGallery").classList.toggle("on",v==="gallery");
 }
-function loadSVG(text){
+function loadSVG(text,name){
   const doc=new DOMParser().parseFromString(text,"image/svg+xml");
   if(doc.querySelector("parsererror")||!doc.querySelector("svg")){$("srcErr").textContent="That doesn't parse as an SVG — check the code and try again.";return false;}
   const svg=doc.querySelector("svg");sanitize(svg);
@@ -407,7 +375,9 @@ function loadSVG(text){
     selected.add(i);
   });
   $("srcErr").textContent="";
-  $("sizeInfo").textContent="Loaded: "+(svg.getAttribute("viewBox")?"viewBox "+svg.getAttribute("viewBox")+" · ":"")+info.length+" parts, all selected. Next: pick parts.";
+  $("sizeInfo").textContent="Loaded: "+(svg.getAttribute("viewBox")?"viewBox "+svg.getAttribute("viewBox")+" · ":"")+info.length+" parts, all selected.";
+  if(name){$("srcBarTxt").textContent=name+" · "+info.length+" parts";$("srcBar").hidden=false;$("srcBody").hidden=true;}
+  $("stageHint").innerHTML="<b>Parts</b> — tap parts in the preview to select them, then pick an effect in the panel.";
   renderEls();renderApplied();updatePreview();
   const stageSvg=$("stage").querySelector("svg");
   if(stageSvg){stageSvg.querySelectorAll(SEL).forEach((el,i)=>{try{lengths[i]=el.getTotalLength();}catch(e){lengths[i]=300;}});renderEls();}
@@ -485,10 +455,6 @@ function buildString(){
   const applyToEl=(a,idx,delay)=>{
     const el=els[idx];if(!el)return;
     const k=kfFor(a,idx);cssParts.push(k.css);
-    if(a.preset==="draw"){
-      if(!el.getAttribute("stroke")||el.getAttribute("stroke")==="none")el.setAttribute("stroke",(info[idx].fill&&info[idx].fill!=="none")?info[idx].fill:"#191924");
-      if(!el.getAttribute("stroke-width"))el.setAttribute("stroke-width","3");
-    }
     const sh="sf"+a.id+" "+a.dur+"s "+a.easing+" "+delay+"s "+(a.loop==="infinite"?"infinite":"1")+k.dir+(a.loop==="infinite"?"":" forwards");
     (perEl[idx]=perEl[idx]||{anim:[],extra:[]}).anim.push(sh);
     if(k.extra)perEl[idx].extra.push(k.extra);
@@ -555,13 +521,6 @@ function renderApplied(){
     const name=(PRESETS.find(p=>p[0]===a.preset)||[])[1]||a.preset;
     const target=a.group?esc(a.group.name)+" · "+a.group.members.length+" parts as one":esc(info[a.el]?info[a.el].tag:"")+" #"+(a.el+1);
     d.innerHTML="<b>"+esc(name)+"</b><span>"+target+"</span><span style='color:var(--muted)'>"+a.dur+"s · delay "+a.delay+"s · "+(a.loop==="infinite"?"loop":"once")+"</span>";
-    if(a.preset==="draw"){
-      const up=document.createElement("button");up.className="iconbtn ord";up.textContent="↑";up.title="Reveal earlier";
-      up.onclick=()=>{const prev=[...animations.slice(0,idx)].reverse().find(x=>x.preset==="draw");if(prev){const t=prev.delay;prev.delay=a.delay;a.delay=t;renderApplied();updatePreview();}};
-      const dn=document.createElement("button");dn.className="iconbtn ord";dn.textContent="↓";dn.title="Reveal later";
-      dn.onclick=()=>{const nxt=animations.slice(idx+1).find(x=>x.preset==="draw");if(nxt){const t=nxt.delay;nxt.delay=a.delay;a.delay=t;renderApplied();updatePreview();}};
-      d.appendChild(up);d.appendChild(dn);
-    }
     const x=document.createElement("button");x.className="iconbtn";x.textContent="✕";x.title="Remove this effect";
     x.onclick=()=>{animations.splice(idx,1);renderApplied();updatePreview();};
     d.appendChild(x);box.appendChild(d);
@@ -569,14 +528,14 @@ function renderApplied(){
   updateStates();
 }
 /* navigation */
-document.querySelectorAll(".stepbtn").forEach(b=>b.onclick=()=>showStep(+b.dataset.step));
-document.querySelectorAll("[data-goto]").forEach(b=>b.onclick=()=>showStep(+b.dataset.goto));
 $("tabCreate").onclick=()=>showView("create");
 $("tabGallery").onclick=()=>showView("gallery");
-$("startOver").onclick=()=>{animations=[];renderApplied();updatePreview();showStep(1);toast("Effects cleared — load a new SVG in step 1");};
+$("srcChange").onclick=()=>{$("srcBar").hidden=true;$("srcBody").hidden=false;};
+$("codeToggle").onclick=()=>{const o=$("out");o.hidden=!o.hidden;$("codeToggle").textContent=o.hidden?"View code ▾":"Hide code ▴";};
+$("startOver").onclick=()=>{animations=[];renderApplied();updatePreview();$("srcBar").hidden=true;$("srcBody").hidden=false;$("srcSect").scrollIntoView({behavior:"smooth"});toast("Effects cleared — load a new SVG above");};
 
 /* timing & options — hidden until wanted, or until the chosen effect needs them */
-function setTune(open){$("tuneBox").hidden=!open;$("tuneToggle").textContent=open?"Timing & options ▴":"Timing & options ▾";}
+function setTune(open){$("tuneBox").hidden=!open;$("tuneToggle").textContent=open?"More options ▴":"More options ▾";}
 $("tuneToggle").onclick=()=>setTune($("tuneBox").hidden);
 
 /* groups */
@@ -594,10 +553,7 @@ const presetsBox=$("presets");
 PRESETS.forEach(([key,label])=>{
   const b=document.createElement("button");b.className="preset"+(key===curPreset?" on":"");b.dataset.preset=key;
   b.innerHTML=ICONS[key]+"<span>"+label+"</span>";b.title=label;
-  b.onclick=()=>{curPreset=key;presetsBox.querySelectorAll(".preset").forEach(x=>x.classList.toggle("on",x.dataset.preset===key));
-    $("colorCtl").style.display=key==="colorfade"?"block":"none";
-    $("morphCtl").style.display=key==="morph"?"block":"none";
-    if(key==="colorfade"||key==="morph")setTune(true);};
+  b.onclick=()=>{curPreset=key;presetsBox.querySelectorAll(".preset").forEach(x=>x.classList.toggle("on",x.dataset.preset===key));};
   presetsBox.appendChild(b);
 });
 $("dur").oninput=e=>$("durOut").textContent=(+e.target.value).toFixed(1)+"s";
@@ -605,41 +561,31 @@ $("delay").oninput=e=>$("delayOut").textContent=(+e.target.value).toFixed(1)+"s"
 $("loopSwitch").querySelectorAll("button").forEach(b=>b.onclick=()=>{curLoop=b.dataset.loop;$("loopSwitch").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b));});
 
 $("applyBtn").onclick=()=>{
-  if(!original){toast("Load an SVG first");showStep(1);return;}
-  if(!selected.size){toast("Pick at least one part first");showStep(2);return;}
+  if(!original){toast("Load an SVG first");$("srcSect").scrollIntoView({behavior:"smooth"});return;}
+  if(!selected.size){toast("Pick at least one part first");$("partsSect").scrollIntoView({behavior:"smooth"});return;}
   const dur=+$("dur").value, baseDelay=+$("delay").value, easing=$("easing").value;
   const targets=[...selected].sort((x,y)=>x-y);
-  if(curPreset==="morph"){
-    const t=$("morphTo").value.trim();
-    if(!t){toast("Paste a morph target path first");return;}
-    if(targets.some(i=>info[i].tag!=="path")){toast("Morph only works on path parts");return;}
-    targets.forEach(i=>animations.push({id:++aid,el:i,preset:"morph",dur,delay:baseDelay,loop:curLoop,easing,morph:t}));
-  }else{
-    /* a fully-selected group animates as ONE unit, not per part */
-    const covered=new Set(),bundles=[];
-    groups.forEach(g=>{if(g.members.length>1&&g.members.every(m=>selected.has(m))){bundles.push(g);g.members.forEach(m=>covered.add(m));}});
-    bundles.forEach(g=>animations.push({id:++aid,el:g.members[0],group:{name:g.name,members:[...g.members]},preset:curPreset,dur,delay:baseDelay,loop:curLoop,easing,color:$("toColor").value}));
-    const singles=targets.filter(i=>!covered.has(i));
-    singles.forEach((i,pos)=>{
-      const delay=curPreset==="draw"&&singles.length>1?+(baseDelay+pos*dur*0.85).toFixed(2):baseDelay;
-      animations.push({id:++aid,el:i,preset:curPreset,dur,delay,loop:curLoop,easing,color:$("toColor").value});
-    });
-    renderApplied();updatePreview();
-    toast(bundles.length?"Applied — "+bundles.map(g=>g.name).join(", ")+" move"+(bundles.length>1?"":"s")+" as one. Export is step 4.":"Applied — preview updated. Export is step 4.");
-    return;
-  }
-  renderApplied();updatePreview();toast("Applied — preview updated. Export is step 4.");
+  /* a fully-selected group animates as ONE unit, not per part */
+  const covered=new Set(),bundles=[];
+  groups.forEach(g=>{if(g.members.length>1&&g.members.every(m=>selected.has(m))){bundles.push(g);g.members.forEach(m=>covered.add(m));}});
+  bundles.forEach(g=>animations.push({id:++aid,el:g.members[0],group:{name:g.name,members:[...g.members]},preset:curPreset,dur,delay:baseDelay,loop:curLoop,easing}));
+  const singles=targets.filter(i=>!covered.has(i));
+  singles.forEach((i,pos)=>{
+    /* draw-on is automatic: parts reveal one after another in document order */
+    const delay=curPreset==="draw"&&singles.length>1?+(baseDelay+pos*dur*0.85).toFixed(2):baseDelay;
+    animations.push({id:++aid,el:i,preset:curPreset,dur,delay,loop:curLoop,easing});
+  });
+  renderApplied();updatePreview();
+  toast(bundles.length?"Applied — "+bundles.map(g=>g.name).join(", ")+" move"+(bundles.length>1?"":"s")+" as one. Export is at the bottom of the panel.":"Applied — preview updated. Export is at the bottom of the panel.");
 };
 $("clearAnims").onclick=()=>{animations=[];renderApplied();updatePreview();};
-$("applyFill").onclick=()=>{if(!original||!selected.size){toast("Pick parts first");return;}selected.forEach(i=>{const el=original.querySelectorAll(SEL)[i];el.setAttribute("fill",$("fillColor").value);info[i].fill=$("fillColor").value;});renderEls();updatePreview();toast("Fill set");};
-$("applyStroke").onclick=()=>{if(!original||!selected.size){toast("Pick parts first");return;}selected.forEach(i=>{const el=original.querySelectorAll(SEL)[i];el.setAttribute("stroke",$("fillColor").value);info[i].stroke=$("fillColor").value;});renderEls();updatePreview();toast("Stroke set");};
 $("selAll").onclick=()=>{info.forEach((_,i)=>selected.add(i));renderEls();};
 $("selNone").onclick=()=>{selected.clear();renderEls();};
-$("loadBtn").onclick=()=>{const v=$("src").value.trim();if(v){if(loadSVG(v))toast("SVG loaded — all parts selected");}else $("srcErr").textContent="Paste some SVG code first — or hit Sample.";};
-$("sampleBtn").onclick=()=>{$("src").value=SAMPLE;loadSVG(SAMPLE);toast("Sample loaded");};
+$("loadBtn").onclick=()=>{const v=$("src").value.trim();if(v){if(loadSVG(v,"Pasted SVG"))toast("SVG loaded — all parts selected");}else $("srcErr").textContent="Paste some SVG code first — or hit Sample.";};
+$("sampleBtn").onclick=()=>{$("src").value=SAMPLE;loadSVG(SAMPLE,"Sample");toast("Sample loaded");};
 $("replayBtn").onclick=()=>{updatePreview();};
 $("file").onchange=e=>{const f=e.target.files[0];if(f)readFile(f);};
-function readFile(f){const r=new FileReader();r.onload=()=>{$("src").value=r.result;loadSVG(r.result);showStep(2);};r.readAsText(f);}
+function readFile(f){const r=new FileReader();r.onload=()=>{$("src").value=r.result;loadSVG(r.result,f.name.replace(/\.svg$/i,""));};r.readAsText(f);}
 const drop=$("drop");
 ["dragenter","dragover"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add("over");}));
 ["dragleave","drop"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove("over");}));
@@ -724,38 +670,74 @@ const GALLERY=[
   sigName:"Equalize",
   sig:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><style>.e{transform-box:fill-box;transform-origin:50% 100%;animation:q 1s ease-in-out infinite}.e2{animation-delay:.18s}.e3{animation-delay:.36s}@keyframes q{0%,100%{transform:scaleY(.35)}50%{transform:scaleY(1)}}</style><rect class="e" x="16" y="22" width="16" height="62" rx="5" fill="none" stroke="#141414" stroke-width="4.5"/><rect class="e e2" x="42" y="22" width="16" height="62" rx="5" fill="none" stroke="#141414" stroke-width="4.5"/><rect class="e e3" x="68" y="22" width="16" height="62" rx="5" fill="none" stroke="#141414" stroke-width="4.5"/></svg>'}
 ];
+const SETS={
+ "Popcorn":"Snacks","Wrapped Candy":"Snacks",
+ "Visor Helmet":"Cyberpunk","Neon Sign":"Cyberpunk","Cyber Arm":"Cyberpunk","Patrol Drone":"Cyberpunk","Bionic Eye":"Cyberpunk","Arcology":"Cyberpunk","Hooded Hacker":"Cyberpunk","AI Chip":"Cyberpunk","Street Bike":"Cyberpunk","Cyberdeck":"Cyberpunk",
+ "Check Mark":"Basics","Heart":"Basics","Star":"Basics","Down Arrow":"Basics","Bell":"Basics","Blob":"Basics","Equalizer Bars":"Basics",
+ "Palm Tree":"Nature","Sun":"Nature",
+ "One-Wheel Board":"Objects","Moonshine Jug":"Objects"
+};
+const SET_ORDER=["Cyberpunk","Basics","Snacks","Nature","Objects"];
 const grid=$("galleryGrid");
-GALLERY.forEach((g,i)=>{
-  const card=document.createElement("div");card.className="gcard";card.dataset.mode="shape";
+const cardModes={};
+function makeCard(g,i){
+  const card=document.createElement("div");card.className="gcard";card.dataset.mode=cardModes[g.title]||"shape";card.dataset.idx=i;
   let toggle="";
-  if(g.sig)toggle='<div class="gtoggle"><button data-mode="shape" class="on">Shape</button><button data-mode="sig">'+esc(g.sigName)+'</button></div>';
-  card.innerHTML='<div class="gprev">'+g.shape+'</div><div class="gbody"><h3>'+esc(g.title)+'</h3><p>'+esc(g.desc)+'</p>'
+  if(g.sig){
+    const m=card.dataset.mode;
+    toggle='<div class="gtoggle"><button data-mode="shape"'+(m==="shape"?' class="on"':"")+'>Shape</button><button data-mode="sig"'+(m==="sig"?' class="on"':"")+'>'+esc(g.sigName)+'</button></div>';
+  }
+  const isSig=card.dataset.mode==="sig"&&g.sig;
+  card.innerHTML='<div class="gprev">'+(isSig?g.sig:g.shape)+'</div><div class="gbody"><h3>'+esc(g.title)+'</h3><p>'+esc(g.desc)+'</p>'
    +'<div class="gtags">'+(g.tags||[]).map(t=>'<button class="gtag" data-tag="'+t+'">'+t+'</button>').join("")+'</div>'
    +toggle
    +'<div class="gact"><button class="btn primary" data-animate="'+i+'">Animate it →</button>'
-   +'<div class="row"><button class="btn" data-copy="'+i+'">Copy shape</button><button class="btn" data-dl="'+i+'">Download shape</button></div></div></div>';
-  grid.appendChild(card);
-});
-/* tag filtering */
+   +'<div class="row"><button class="btn" data-copy="'+i+'">'+(isSig?"Copy animated":"Copy shape")+'</button><button class="btn" data-dl="'+i+'">'+(isSig?"Download animated":"Download shape")+'</button></div></div></div>';
+  return card;
+}
+/* gallery views: Newest (latest 20) or grouped By set; search + tag chips filter either */
+let curTag="all", query="", gMode="newest";
+function gMatches(g){
+  const tagOk=curTag==="all"||(g.tags||[]).includes(curTag);
+  const q=query.trim().toLowerCase();
+  const qOk=!q||g.title.toLowerCase().includes(q)||(g.tags||[]).some(t=>t.includes(q))||(SETS[g.title]||"").toLowerCase().includes(q);
+  return tagOk&&qOk;
+}
+function renderGallery(){
+  grid.innerHTML="";
+  let shown=0;
+  const filtering=curTag!=="all"||!!query.trim();
+  if(filtering||gMode==="newest"){
+    grid.className="gallery";
+    const list=filtering?GALLERY.filter(gMatches):GALLERY.slice(0,20);
+    list.forEach(g=>{grid.appendChild(makeCard(g,GALLERY.indexOf(g)));shown++;});
+  }else{
+    grid.className="";
+    SET_ORDER.forEach(s=>{
+      const items=GALLERY.filter(g=>SETS[g.title]===s);
+      if(!items.length)return;
+      const hd=document.createElement("h3");hd.className="gsettl";hd.textContent=s;grid.appendChild(hd);
+      const sub=document.createElement("div");sub.className="gallery";
+      items.forEach(g=>{sub.appendChild(makeCard(g,GALLERY.indexOf(g)));shown++;});
+      grid.appendChild(sub);
+    });
+  }
+  $("galleryEmpty").hidden=shown>0;
+}
 const chipsBox=$("tagChips");
 const allTags=[...new Set(GALLERY.flatMap(g=>g.tags||[]))].sort();
-let curTag="all";
-function applyTagFilter(){
-  document.querySelectorAll(".gcard").forEach((card,i)=>{
-    const g=GALLERY[i];
-    card.style.display=(curTag==="all"||(g.tags||[]).includes(curTag))?"":"none";
-  });
-}
 function renderChips(){
   chipsBox.innerHTML="";
-  const mk=(tag,label,count)=>{const b=document.createElement("button");b.className="tchip"+(curTag===tag?" on":"");b.textContent=label+" · "+count;b.onclick=()=>{curTag=tag;renderChips();applyTagFilter();};chipsBox.appendChild(b);};
+  const mk=(tag,label,count)=>{const b=document.createElement("button");b.className="tchip"+(curTag===tag?" on":"");b.textContent=label+" · "+count;b.onclick=()=>{curTag=tag;renderChips();renderGallery();};chipsBox.appendChild(b);};
   mk("all","All",GALLERY.length);
   allTags.forEach(t=>mk(t,t,GALLERY.filter(g=>(g.tags||[]).includes(t)).length));
 }
-function setTag(t){curTag=t;renderChips();applyTagFilter();}
-renderChips();
+function setTag(t){curTag=t;renderChips();renderGallery();}
+$("gallerySearch").addEventListener("input",e=>{query=e.target.value;renderGallery();});
+$("modeNewest").onclick=()=>{gMode="newest";$("modeNewest").classList.add("on");$("modeSets").classList.remove("on");renderGallery();};
+$("modeSets").onclick=()=>{gMode="sets";$("modeSets").classList.add("on");$("modeNewest").classList.remove("on");renderGallery();};
 function cardVersion(card){
-  const g=GALLERY[+card.querySelector("[data-copy]").dataset.copy];
+  const g=GALLERY[+card.dataset.idx];
   return card.dataset.mode==="sig"&&g.sig?g.sig:g.shape;
 }
 grid.addEventListener("click",e=>{
@@ -765,8 +747,8 @@ grid.addEventListener("click",e=>{
   const tog=e.target.closest("button[data-mode]");
   if(tog){
     card.dataset.mode=tog.dataset.mode;
+    cardModes[GALLERY[+card.dataset.idx].title]=tog.dataset.mode;
     card.querySelectorAll("button[data-mode]").forEach(b=>b.classList.toggle("on",b===tog));
-    const g=GALLERY[+card.querySelector("[data-copy]").dataset.copy];
     card.querySelector(".gprev").innerHTML=cardVersion(card);
     const isSig=card.dataset.mode==="sig";
     card.querySelector("[data-copy]").textContent=isSig?"Copy animated":"Copy shape";
@@ -777,7 +759,7 @@ grid.addEventListener("click",e=>{
   if(an){
     const g=GALLERY[+an.dataset.animate];
     $("src").value=g.shape;
-    if(loadSVG(g.shape)){showView("create");showStep(2);window.scrollTo({top:0,behavior:"smooth"});toast(g.title+" shape loaded — pick parts, then add motion");}
+    if(loadSVG(g.shape,g.title)){showView("create");window.scrollTo({top:0,behavior:"smooth"});toast(g.title+" loaded — parts are in the panel, pick an effect");}
     return;
   }
   const c=e.target.closest("[data-copy]"),d=e.target.closest("[data-dl]");
@@ -786,9 +768,10 @@ grid.addEventListener("click",e=>{
 });
 
 /* init */
+renderChips();
+renderGallery();
 $("src").value=SAMPLE;
-loadSVG(SAMPLE);
-showStep(1);
-showView("create");
+loadSVG(SAMPLE,"Sample");
+showView("gallery");
 </script>
 </html>
