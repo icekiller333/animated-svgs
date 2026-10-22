@@ -192,7 +192,7 @@ footer{max-width:1180px;margin:0 auto;padding:0 20px 34px;color:var(--muted);fon
           <button class="btn" id="replayBtn">↻ Replay</button>
         </div>
         <div class="stage" id="stage"><div class="empty">Nothing loaded yet.<br>Load the sample to see it in action.</div></div>
-        <p class="stagehint" id="stageHint"><b>Parts</b> — tap parts in the preview to select them, then pick an effect in the panel.</p>
+        <p class="stagehint" id="stageHint">The whole SVG animates as one piece — pick an effect in the panel.</p>
       </div>
 
       <div class="card panel" id="inspector">
@@ -217,25 +217,10 @@ footer{max-width:1180px;margin:0 auto;padding:0 20px 34px;color:var(--muted);fon
           </div>
         </section>
 
-        <section class="sect" id="partsSect">
-          <h3 class="secttl">Parts</h3>
-          <p class="hint">Tap parts in the preview — selected parts glow purple, the rest dim. Group parts to shrink a long list into a few units that move as one.</p>
-          <div class="row" style="margin-bottom:10px">
-            <button class="btn" id="selAll">All</button>
-            <button class="btn" id="selNone">None</button>
-            <span style="color:var(--muted);font-size:13px" id="selInfo"></span>
-          </div>
-          <div class="row" style="margin-bottom:6px">
-            <input type="text" id="groupName" placeholder="Group name (optional)" style="flex:1;min-width:130px;border:1px solid var(--line);border-radius:10px;padding:8px 10px;font:inherit;font-size:13.5px">
-            <button class="btn" id="groupBtn" title="Turn the selected parts into one group">Group selected</button>
-          </div>
-          <div class="groups" id="groupsList"></div>
-          <div class="els" id="els"><p class="hint">Parts appear here once an SVG is loaded.</p></div>
-        </section>
 
         <section class="sect" id="fxSect">
           <h3 class="secttl">Effect</h3>
-          <p class="hint">Basic CSS animations — pick one and apply it. Draw-on figures out the stroke order itself.</p>
+          <p class="hint">Basic CSS animations for the whole SVG — pick one and apply it. Draw-on figures out the stroke order itself.</p>
           <div class="presets" id="presets"></div>
           <div class="ctl">
             <label>Speed <output id="durOut">1.5s</output></label>
@@ -265,7 +250,7 @@ footer{max-width:1180px;margin:0 auto;padding:0 20px 34px;color:var(--muted);fon
               </select>
             </div>
           </div>
-          <button class="btn primary wide" id="applyBtn" style="margin-top:12px">Apply to selected parts</button>
+          <button class="btn primary wide" id="applyBtn" style="margin-top:12px">Apply effect</button>
           <div class="applied" id="applied"></div>
           <div class="row" style="margin-top:10px">
             <button class="btn ghost" id="clearAnims">Clear all effects</button>
@@ -350,8 +335,8 @@ function sanitize(root){
     if(/^on/i.test(a.name)||(/^(xlink:)?href$/i.test(a.name)&&/^\s*javascript:/i.test(a.value)))n.removeAttribute(a.name);});});
 }
 function updateStates(){
-  $("chipSel").textContent=original?selected.size+" of "+info.length+" parts selected":"No SVG loaded";
-  $("chipSel").classList.toggle("hot",selected.size>0);
+  $("chipSel").textContent=original?info.length+" parts · animates as one":"No SVG loaded";
+  $("chipSel").classList.toggle("hot",!!original);
   $("chipFx").textContent=animations.length+(animations.length===1?" effect":" effects");
   $("chipFx").classList.toggle("hot",animations.length>0);
   $("exportSummary").textContent=animations.length?
@@ -377,60 +362,13 @@ function loadSVG(text,name){
   $("srcErr").textContent="";
   $("sizeInfo").textContent="Loaded: "+(svg.getAttribute("viewBox")?"viewBox "+svg.getAttribute("viewBox")+" · ":"")+info.length+" parts, all selected.";
   if(name){$("srcBarTxt").textContent=name+" · "+info.length+" parts";$("srcBar").hidden=false;$("srcBody").hidden=true;}
-  $("stageHint").innerHTML="<b>Parts</b> — tap parts in the preview to select them, then pick an effect in the panel.";
-  renderEls();renderApplied();updatePreview();
+  $("stageHint").textContent="The whole SVG animates as one piece — pick an effect in the panel.";
+  groups=[{id:++gid,name:"Whole SVG",members:info.map((_,i)=>i)}];
+  renderApplied();updatePreview();
   const stageSvg=$("stage").querySelector("svg");
-  if(stageSvg){stageSvg.querySelectorAll(SEL).forEach((el,i)=>{try{lengths[i]=el.getTotalLength();}catch(e){lengths[i]=300;}});renderEls();}
+  if(stageSvg){stageSvg.querySelectorAll(SEL).forEach((el,i)=>{try{lengths[i]=el.getTotalLength();}catch(e){lengths[i]=300;}});}
   updateStates();
   return true;
-}
-function stageEl(i){const s=$("stage").querySelector("svg");return s?s.querySelectorAll(SEL)[i]:null;}
-function togglePart(i){selected.has(i)?selected.delete(i):selected.add(i);renderEls();updatePreview();}
-function paintSelection(){
-  const s=$("stage").querySelector("svg");if(!s)return;
-  s.querySelectorAll(SEL).forEach((el,i)=>{
-    el.classList.toggle("hili",selected.has(i));
-    el.classList.toggle("dim",selected.size>0&&selected.size<info.length&&!selected.has(i));
-  });
-}
-function partRow(i){
-  const p=info[i];
-  const b=document.createElement("button");b.className="el"+(selected.has(i)?" sel":"");
-  const col=p.fill&&p.fill!=="none"?p.fill:(p.stroke&&p.stroke!=="none"?p.stroke:"#ccccdd");
-  b.innerHTML='<span class="tag">'+esc(p.tag)+'</span><span>Part '+(i+1)+'</span><span class="dot" style="background:'+esc(col)+'"></span><span class="meta">'+(lengths[i]?"len "+Math.round(lengths[i]):"")+'</span>';
-  b.title="Select / deselect this part";
-  b.onclick=()=>togglePart(i);
-  b.onmouseenter=()=>{const e=stageEl(i);if(e)e.classList.add("hili");};
-  b.onmouseleave=()=>paintSelection();
-  return b;
-}
-function renderEls(){
-  const box=$("els"),gbox=$("groupsList");
-  if(!info.length){box.innerHTML='<p class="hint">Parts appear here once an SVG is loaded.</p>';gbox.innerHTML="";$("selInfo").textContent="";updateStates();return;}
-  gbox.innerHTML="";
-  const grouped=new Set();groups.forEach(g=>g.members.forEach(m=>grouped.add(m)));
-  groups.forEach(g=>{
-    const row=document.createElement("div");row.className="grow";
-    const allSel=g.members.length>0&&g.members.every(m=>selected.has(m));
-    row.innerHTML='<span class="gname">'+esc(g.name)+'</span><span class="gcount">'+g.members.length+' parts'+(allSel?" · selected":"")+'</span>';
-    const sel=document.createElement("button");sel.className="btn gbtn";sel.textContent=allSel?"Selected ✓":"Select";
-    sel.title="Select exactly this group's parts";
-    sel.onclick=()=>{selected=new Set(g.members);renderEls();updatePreview();};
-    const exp=document.createElement("button");exp.className="iconbtn";exp.style.marginLeft="0";exp.textContent=expandedGroups.has(g.id)?"▾":"▸";exp.title="Show / hide the parts in this group";
-    exp.onclick=()=>{expandedGroups.has(g.id)?expandedGroups.delete(g.id):expandedGroups.add(g.id);renderEls();};
-    const un=document.createElement("button");un.className="iconbtn";un.style.marginLeft="0";un.textContent="✕";un.title="Ungroup (the parts stay, the group goes away)";
-    un.onclick=()=>{groups=groups.filter(x=>x.id!==g.id);renderEls();updatePreview();};
-    row.appendChild(sel);row.appendChild(exp);row.appendChild(un);
-    gbox.appendChild(row);
-    const members=document.createElement("div");members.className="gmembers"+(expandedGroups.has(g.id)?" open":"");
-    g.members.forEach(m=>members.appendChild(partRow(m)));
-    gbox.appendChild(members);
-  });
-  box.innerHTML="";
-  info.forEach((p,i)=>{if(!grouped.has(i))box.appendChild(partRow(i));});
-  if(grouped.size&&box.children.length===0)box.innerHTML='<p class="hint" style="margin:0">All parts are grouped — expand a group above to see its parts.</p>';
-  $("selInfo").textContent=selected.size+" selected";
-  updateStates();
 }
 function kfFor(a,i){
   const inf=a.loop==="infinite";
@@ -461,8 +399,12 @@ function buildString(){
   };
   animations.forEach(a=>{
     if(a.group){
-      if(a.preset==="draw"||a.preset==="colorfade"){
-        /* stroke/color effects can't inherit through a wrapper — apply to every member in sync, same delay, no stagger */
+      if(a.preset==="draw"){
+        /* draw-on can't inherit through a wrapper — apply per member, auto-chained in document order */
+        a.group.members.forEach((i,pos)=>applyToEl(a,i,+(a.delay+pos*a.dur*0.85).toFixed(2)));
+        return;
+      }
+      if(a.preset==="colorfade"){
         a.group.members.forEach(i=>applyToEl(a,i,a.delay));
         return;
       }
@@ -505,9 +447,6 @@ function updatePreview(){
   if(!original)return;
   $("stage").innerHTML=buildString();
   $("out").value=animations.length?buildString():"";
-  const s=$("stage").querySelector("svg");
-  if(s)s.querySelectorAll(SEL).forEach((el,i)=>{el.setAttribute("data-part",i);el.addEventListener("click",()=>togglePart(i));});
-  paintSelection();
   updateStates();
   syncStageH();
 }
@@ -538,15 +477,6 @@ $("startOver").onclick=()=>{animations=[];renderApplied();updatePreview();$("src
 function setTune(open){$("tuneBox").hidden=!open;$("tuneToggle").textContent=open?"More options ▴":"More options ▾";}
 $("tuneToggle").onclick=()=>setTune($("tuneBox").hidden);
 
-/* groups */
-$("groupBtn").onclick=()=>{
-  if(selected.size<2){toast("Pick at least 2 parts to make a group — tap them in the preview");return;}
-  const name=$("groupName").value.trim()||("Group "+(groups.length+1));
-  groups.push({id:++gid,name:name,members:[...selected].sort((a,b)=>a-b)});
-  $("groupName").value="";
-  renderEls();updatePreview();
-  toast(name+" created — the list just got shorter");
-};
 
 /* presets + controls */
 const presetsBox=$("presets");
@@ -562,7 +492,6 @@ $("loopSwitch").querySelectorAll("button").forEach(b=>b.onclick=()=>{curLoop=b.d
 
 $("applyBtn").onclick=()=>{
   if(!original){toast("Load an SVG first");$("srcSect").scrollIntoView({behavior:"smooth"});return;}
-  if(!selected.size){toast("Pick at least one part first");$("partsSect").scrollIntoView({behavior:"smooth"});return;}
   const dur=+$("dur").value, baseDelay=+$("delay").value, easing=$("easing").value;
   const targets=[...selected].sort((x,y)=>x-y);
   /* a fully-selected group animates as ONE unit, not per part */
@@ -579,8 +508,6 @@ $("applyBtn").onclick=()=>{
   toast(bundles.length?"Applied — "+bundles.map(g=>g.name).join(", ")+" move"+(bundles.length>1?"":"s")+" as one. Export is at the bottom of the panel.":"Applied — preview updated. Export is at the bottom of the panel.");
 };
 $("clearAnims").onclick=()=>{animations=[];renderApplied();updatePreview();};
-$("selAll").onclick=()=>{info.forEach((_,i)=>selected.add(i));renderEls();};
-$("selNone").onclick=()=>{selected.clear();renderEls();};
 $("loadBtn").onclick=()=>{const v=$("src").value.trim();if(v){if(loadSVG(v,"Pasted SVG"))toast("SVG loaded — all parts selected");}else $("srcErr").textContent="Paste some SVG code first — or hit Sample.";};
 $("sampleBtn").onclick=()=>{$("src").value=SAMPLE;loadSVG(SAMPLE,"Sample");toast("Sample loaded");};
 $("replayBtn").onclick=()=>{updatePreview();};

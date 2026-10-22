@@ -65,3 +65,14 @@ Canvas always visible (left on desktop, sticky top on mobile). One control colum
 1. **Draw-on STAYS as a one-click AUTO preset.** Its job: a simple reveal — make the strokes look drawn. The tool figures out the order itself (v1 heuristic: document order with staggered timing); no per-stroke ordering UI. Order quality can improve in later versions. It joins the basics as a 7th preset and stays pure CSS (stroke-dashoffset).
 2. **Gallery grouped BY SET with headings, plus a "Newest" view showing the latest 20.** Sets: Cyberpunk (10), Basics (7), Snacks (2), Nature (2), Objects (2).
 3. **Animator desktop layout: Figma style** — canvas left, inspector panel right. Mobile keeps the sticky-canvas-top pattern.
+
+## v4.1 correction (2026-10-22, Ken's feedback on v4)
+Ken: the Animator "still has the individual line selection part, which is way too complicated."
+He was right — the brief preserved the v3 parts/groups model out of caution, which contradicted
+his actual direction ("basic animations," declutter). The deploy itself was verified live and
+correct; the scope was the error. **v4.1 removes part selection entirely**: no parts list, no
+tap-to-select, no groups UI. The whole SVG animates as one unit (the group-wrapper mechanism,
+applied to the entire graphic); Draw-on still chains the individual strokes internally with the
+auto stagger — the system handles the per-line work, the user never sees it. Panel is now just
+SVG → Effect → Export. Lesson recorded: when Ken says "basic/simple," simplify the interaction
+model itself, not just the chrome around it.

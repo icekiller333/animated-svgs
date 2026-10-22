@@ -16,8 +16,6 @@ A single-screen, Figma-style studio — canvas on the left, inspector on the rig
 (sticky canvas on mobile). No wizard, no steps:
 
 - **SVG** — paste code, upload, or use the sample; collapses to a one-line bar once loaded.
-- **Parts** — tap parts in the canvas (selected glow purple, the rest dim); named groups
-  collapse long lists and animate as one unit.
 - **Effect** — 7 basic animations as tiles that preview their motion: **Draw on** (one click —
   the tool works out the stroke order itself), Fade, Pulse, Spin, Bounce, Slide, Wiggle.
   One speed slider + Loop/Once; delay and easing live under "More options."
