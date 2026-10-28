@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mushroom Boing</title>
+<style>
+  html,body{margin:0;padding:0;background:#fdf6d8;}
+  #wrap{width:100%;margin:0 auto;background:#fdf6d8;overflow:hidden;}
+  #stage{display:block;width:100%;touch-action:manipulation;cursor:pointer;}
+</style>
+</head>
+<body>
+<div id="wrap"><canvas id="stage"></canvas></div>
+<script>
+(function(){
+  var wrap = document.getElementById('wrap');
+  var cv = document.getElementById('stage');
+  var ctx = cv.getContext('2d');
+  var lastW = 0, rafQueued = false;
+
+  // State: s = squash amount (0 = normal); it oscillates on a damped spring,
+  // so a tap squashes flat, then stretches tall, then wobbles back to normal.
+  var S = {
+    t: 0, s: 0, sV: 0, lean: 0, leanTarget: 0,
+    mx: -999, my: -999, hover: false,
+    launch: null, // {y, vy, rot, vr}
+    parts: [], banner: 0, bannerText: '', taps: [], boings: 0
+  };
+
+  function W(){ return cv.width; }
+  function H(){ return cv.height; }
+  function groundY(){ return H() - 64; }
+  function mushX(){ return W() * 0.5; }
+  function mushTopY(){ return groundY() - 78; }
+
+  function fit(){
+    var w = (wrap && wrap.clientWidth) || window.innerWidth || 900;
+    if (!w || w <= 0) return;
+    if (lastW && Math.abs(w - lastW) < 3) return; // ignore viewer resize storms
+    lastW = w;
+    var h = Math.round(w * 0.32);
+    if (h < 220) h = 220;
+    if (h > 420) h = 420;
+    var cap = Math.floor((window.innerHeight || 800) * 0.8);
+    if (cap > 180 && h > cap) h = cap;
+    cv.width = w; cv.height = h;
+    cv.style.height = h + 'px';
+    draw();
+  }
+
+  // ---- sound: created only on interaction, never autoplay ----
+  var AC = null;
+  function audio(){
+    if (AC) return AC;
+    try {
+      var C = window.AudioContext || window.webkitAudioContext;
+      if (!C) return null;
+      AC = new C();
+    } catch(e){ return null; }
+    return AC;
+  }
+  function boingSound(big){
+    var ac = audio(); if (!ac) return;
+    try {
+      if (ac.resume) ac.resume();
+      var o = ac.createOscillator(), g = ac.createGain();
+      o.type = 'sine';
+      o.frequency.setValueAtTime(big ? 420 : 320, ac.currentTime);
+      o.frequency.exponentialRampToValueAtTime(70, ac.currentTime + (big ? 0.45 : 0.28));
+      g.gain.setValueAtTime(0.22, ac.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + (big ? 0.5 : 0.3));
+      o.connect(g); g.connect(ac.destination);
+      o.start(); o.stop(ac.currentTime + (big ? 0.5 : 0.3));
+    } catch(e){}
+  }
+  function popSound(){
+    var ac = audio(); if (!ac) return;
+    try {
+      var o = ac.createOscillator(), g = ac.createGain();
+      o.type = 'triangle';
+      o.frequency.setValueAtTime(900, ac.currentTime);
+      o.frequency.exponentialRampToValueAtTime(300, ac.currentTime + 0.08);
+      g.gain.setValueAtTime(0.12, ac.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.1);
+      o.connect(g); g.connect(ac.destination);
+      o.start(); o.stop(ac.currentTime + 0.1);
+    } catch(e){}
+  }
+
+  function puff(n, x, y, spread){
+    for (var i = 0; i < n; i++){
+      var a = Math.random() * Math.PI * 2, sp = 30 + Math.random() * spread;
+      S.parts.push({x:x, y:y, vx:Math.cos(a)*sp, vy:Math.sin(a)*sp - 40,
+        r:2 + Math.random()*3.5, life:1});
+    }
+  }
+
+  function boing(x, y){
+    if (S.launch) return;
+    S.s = 0; S.sV = 7.5; // spring impulse: squash, stretch, wobble, settle
+    S.boings++;
+    puff(8, x, y, 90);
+    boingSound(false);
+    popSound();
+    var now = S.t;
+    S.taps.push(now);
+    while (S.taps.length && now - S.taps[0] > 1.5) S.taps.shift();
+    if (S.taps.length >= 3){
+      // EASTER EGG: 3 quick taps -> MEGA BOING launch
+      S.taps = [];
+      S.launch = {y: 0, vy: -980, rot: 0, vr: 9};
+      boingSound(true);
+      S.bannerText = 'SPORE SHOWER!';
+      S.banner = 1.8;
+    }
+  }
+
+  function hitTest(x, y){
+    var dx = (x - mushX()) / 85, dy = (y - (groundY() - 55)) / 90;
+    return (dx*dx + dy*dy) < 1;
+  }
+
+  function pos(e){
+    var r = cv.getBoundingClientRect ? cv.getBoundingClientRect() : {left:0, top:0};
+    return {x: e.clientX - r.left, y: e.clientY - r.top};
+  }
+
+  cv.addEventListener('pointerdown', function(e){
+    audio(); // user gesture: safe to create the audio context
+    var p = pos(e);
+    if (hitTest(p.x, p.y)) boing(mushX(), mushTopY());
+  });
+  cv.addEventListener('pointermove', function(e){
+    var p = pos(e);
+    S.mx = p.x; S.my = p.y; S.hover = true;
+    var d = p.x - mushX();
+    S.leanTarget = Math.abs(d) < 260 ? Math.max(-0.28, Math.min(0.28, d / 700)) : 0;
+  });
+  cv.addEventListener('pointerleave', function(){ S.hover = false; S.leanTarget = 0; });
+
+  var resizeTimer = null;
+  window.addEventListener('resize', function(){
+    if (resizeTimer) clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(fit, 220);
+  });
+
+  function draw(){
+    var w = W(), h = H(); if (!w || !h) return;
+    ctx.clearRect(0, 0, w, h);
+    ctx.fillStyle = '#fdf6d8';
+    ctx.fillRect(0, 0, w, h);
+    var gy = groundY(), cx = mushX();
+    // one ground line only -- the whole "scene"
+    ctx.strokeStyle = '#2b2b2b'; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(20, gy + 2); ctx.lineTo(w - 20, gy + 2); ctx.stroke();
+
+    var sy = 1 - 0.52 * S.s, sx = 1 + 0.38 * S.s;
+    if (sy < 0.25) sy = 0.25;
+    var sway = Math.sin(S.t * 1.3) * 0.035;
+    var rot = S.lean + sway;
+    var lift = S.launch ? S.launch.y : 0;
+    var spin = S.launch ? S.launch.rot : 0;
+
+    ctx.save();
+    ctx.translate(cx, gy + lift);
+    ctx.rotate(rot + spin);
+    ctx.scale(sx, sy);
+    // stem
+    ctx.fillStyle = '#fff3d6';
+    ctx.beginPath();
+    ctx.moveTo(-16, 0); ctx.lineTo(-11, -52); ctx.lineTo(11, -52); ctx.lineTo(16, 0);
+    ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = '#2b2b2b'; ctx.lineWidth = 3; ctx.stroke();
+    // cap: one half-ellipse, three dots
+    ctx.fillStyle = '#ff5d5d';
+    ctx.beginPath(); ctx.ellipse(0, -52, 58, 34, 0, Math.PI, 0); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = '#2b2b2b'; ctx.lineWidth = 3; ctx.stroke();
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath(); ctx.arc(-30, -62, 7, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(0, -76, 9, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(30, -62, 7, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+
+    // spores
+    for (var i = 0; i < S.parts.length; i++){
+      var p = S.parts[i];
+      ctx.globalAlpha = Math.max(0, p.life);
+      ctx.fillStyle = '#ffb84d';
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    // banner (brief, then gone -- no persistence)
+    if (S.banner > 0){
+      ctx.globalAlpha = Math.min(1, S.banner);
+      ctx.fillStyle = '#2b2b2b';
+      ctx.font = 'bold 34px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(S.bannerText, w / 2, 52);
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  var last = 0;
+  function tick(now){
+    if (rafQueued) { /* loop re-queued first below */ }
+    rafQueued = true;
+    requestAnimationFrame(tick);
+    if (!last) last = now;
+    var dt = (now - last) / 1000; last = now;
+    if (dt > 0.05) dt = 0.05; if (dt < 0) dt = 0;
+    S.t += dt;
+    // squash spring: k=95, damping=7 -> squash, stretch, wobble, settle
+    S.sV += (-95 * S.s - 7 * S.sV) * dt;
+    S.s += S.sV * dt;
+    S.lean += (S.leanTarget - S.lean) * Math.min(1, dt * 8);
+    if (S.banner > 0) S.banner -= dt;
+    if (S.launch){
+      var L = S.launch;
+      L.vy += 1900 * dt; L.y += L.vy * dt; L.rot += L.vr * dt;
+      if (L.y >= 0 && L.vy > 0){
+        S.launch = null;
+        S.s = 0; S.sV = 9; // landing squash, bigger than a tap
+        puff(30, mushX(), mushTopY(), 220);
+        boingSound(true);
+        S.bannerText = 'SPORE SHOWER!'; S.banner = 1.8;
+      }
+    }
+    for (var i = S.parts.length - 1; i >= 0; i--){
+      var p = S.parts[i];
+      p.vy += 60 * dt; p.x += p.vx * dt; p.y += p.vy * dt; p.life -= dt * 0.9;
+      if (p.life <= 0) S.parts.splice(i, 1);
+    }
+    draw();
+  }
+
+  fit();
+  setTimeout(fit, 150);
+  requestAnimationFrame(tick);
+
+  // test hooks (harmless in production)
+  window.__mushroom = { S: S, fit: fit, boing: boing, hitTest: hitTest };
+})();
+</script>
+</body>
+</html>

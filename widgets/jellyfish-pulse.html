@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jellyfish Pulse</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#eaf7f5; font-family:system-ui, sans-serif; }
+  #wrap { width:100%; max-width:1160px; margin:0 auto; position:relative; }
+  canvas { display:block; width:100%; background:#eaf7f5; touch-action:none; cursor:pointer; }
+  #mute { position:absolute; top:10px; right:10px; border:2px solid #0f766e; background:#fff;
+    color:#0f766e; border-radius:999px; padding:4px 10px; font-size:14px; cursor:pointer; }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <canvas id="stage" role="img" aria-label="A jellyfish. Drag over it to spin it and make bubbles, or grab it and drag it around to leave a bubble trail."></canvas>
+  <button id="mute" aria-label="Toggle sound">🔊</button>
+</div>
+<script>
+(function(){
+  var wrap = document.getElementById('wrap');
+  var cv = document.getElementById('stage');
+  var ctx = cv.getContext('2d');
+  var muteBtn = document.getElementById('mute');
+  var muted = false;
+  var W = 0, H = 0, lastW = 0;
+
+  // ---- audio: only on interaction, never autoplay ----
+  var AC = null;
+  function ac(){
+    if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){ AC = null; } }
+    if (AC && AC.state === 'suspended') { try { AC.resume(); } catch(e){} }
+    return AC;
+  }
+  function tone(f, t, d, type, vol){
+    if (muted) return;
+    var a = ac(); if (!a) return;
+    try {
+      var o = a.createOscillator(), g = a.createGain();
+      o.type = type || 'sine'; o.frequency.value = f;
+      g.gain.setValueAtTime(vol || 0.12, a.currentTime + t);
+      g.gain.exponentialRampToValueAtTime(0.001, a.currentTime + t + d);
+      o.connect(g); g.connect(a.destination);
+      o.start(a.currentTime + t); o.stop(a.currentTime + t + d + 0.02);
+    } catch(e){}
+  }
+  function blip(){ tone(520, 0, 0.18, 'sine', 0.14); tone(780, 0.05, 0.22, 'sine', 0.08); }
+  function chime(){ [660, 880, 1100, 1320].forEach(function(f, i){ tone(f, i * 0.09, 0.4, 'sine', 0.1); }); }
+  muteBtn.addEventListener('click', function(){
+    muted = !muted; muteBtn.textContent = muted ? '🔇' : '🔊';
+  });
+
+  // ---- state: one jellyfish, nothing else ----
+  var J = {
+    x: 0, y: 0, baseY: 0, vy: 0,
+    squash: 0,          // >0 stretched tall, <0 squashed flat; springs to 0
+    wob: 0,             // wobble phase
+    sway: 0,            // tentacle sway phase
+    pulseT: 0,          // ambient pulse timer
+    dragging: false, dragId: null,
+    tx: 0, ty: 0,       // drag target (jelly follows your hand)
+    rot: 0, rotV: 0,    // spin: angle + angular velocity
+    trailAcc: 0,        // distance since last trail bubble
+    sweepAcc: 0,        // distance since last drag-over bubble burst
+    lastSweepSnd: 0,
+    moved: 0,           // distance dragged this gesture (tap vs drag)
+    gx: 0, gy: 0,       // fling glide velocity after release
+    twirlAcc: 0, twirlPrev: null, twirled: false,  // circle-drag twirl egg
+    lagX: 0,            // tentacle lag behind motion
+    hoverLean: 0,       // shy lean from cursor
+    glow: 0             // egg glow timer
+  };
+  var parts = [];      // particles: {x,y,vx,vy,life,max,kind}
+  var mx = -999, my = -999, hovering = false;   // cursor pos for lean + curious drift
+  var banner = { text: '', t: 0 };
+  var taps = [];       // timestamps of recent taps for the egg
+
+  function fit(){
+    var w = (wrap && wrap.clientWidth) || window.innerWidth || 900;
+    if (Math.abs(w - lastW) < 3 && W) return;   // ignore viewer resize storms
+    lastW = w; W = w;
+    H = Math.max(240, Math.min(380, Math.round(w * 0.32)));
+    cv.width = W; cv.height = H;
+    cv.style.height = H + 'px';
+    J.x = W / 2; J.baseY = H * 0.46; if (!J.y) J.y = J.baseY;
+    draw();
+  }
+
+  function burst(x, y, n, kind){
+    for (var i = 0; i < n; i++){
+      var a = Math.random() * Math.PI * 2, sp = 40 + Math.random() * 160;
+      parts.push({ x: x, y: y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 40,
+        life: 0, max: 0.5 + Math.random() * 0.5, kind: kind });
+    }
+  }
+  // one rising bubble at the jelly's tail — the drag trail
+  function trailBubble(){
+    parts.push({ x: J.x + (Math.random() - 0.5) * 30, y: J.y + 26 + Math.random() * 14,
+      vx: (Math.random() - 0.5) * 18, vy: -30 - Math.random() * 40,
+      life: 0, max: 1.0 + Math.random() * 0.7, kind: 'trail' });
+  }
+  function ringBurst(){
+    for (var i = 0; i < 14; i++){
+      var a = i / 14 * Math.PI * 2;
+      parts.push({ x: J.x + Math.cos(a) * 70, y: J.y + Math.sin(a) * 70,
+        vx: Math.cos(a) * 90, vy: Math.sin(a) * 90 - 30,
+        life: 0, max: 1.1, kind: 'trail' });
+    }
+    parts.push({ x: J.x, y: J.y, vx: 0, vy: 0, life: 0, max: 0.9, kind: 'spark' });
+  }
+  function sweepBubbles(){
+    for (var i = 0; i < 2; i++){
+      parts.push({ x: J.x + (Math.random() - 0.5) * 90, y: J.y + (Math.random() - 0.5) * 60,
+        vx: (Math.random() - 0.5) * 24, vy: -36 - Math.random() * 50,
+        life: 0, max: 0.8 + Math.random() * 0.6, kind: 'trail' });
+    }
+  }
+
+  function pulse(){
+    J.vy = -300; J.squash = 0.55; J.wob = 0;
+    burst(J.x, J.y + 30, 6, 'bubble');
+    blip();
+  }
+
+  function egg(){
+    J.glow = 1.4; banner.text = 'GLOW BLOOM!'; banner.t = 2;
+    burst(J.x, J.y, 30, 'spark');
+    chime();
+  }
+
+  function onTap(x, y){
+    var d = Math.hypot(x - J.x, y - J.y);
+    if (d > 110) return;                       // miss: nothing happens
+    pulse();
+    var now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+    taps.push(now);
+    while (taps.length && now - taps[0] > 1500) taps.shift();
+    if (taps.length >= 3){ taps = []; egg(); }
+  }
+
+  function pos(e){
+    var r = cv.getBoundingClientRect();
+    return { x: e.clientX - r.left, y: e.clientY - r.top };
+  }
+
+  cv.addEventListener('pointerdown', function(e){
+    var p = pos(e);
+    if (Math.hypot(p.x - J.x, p.y - J.y) < 120){
+      J.dragging = true; J.dragId = e.pointerId;
+      J.tx = p.x; J.ty = p.y; J.moved = 0; J.trailAcc = 0;
+      J.twirlPrev = null; J.twirlAcc = 0; J.twirled = false;
+      try { cv.setPointerCapture(e.pointerId); } catch(err){}
+    }
+  });
+  cv.addEventListener('pointermove', function(e){
+    var p = pos(e);
+    mx = p.x; my = p.y; hovering = true;
+    var d = Math.hypot(p.x - J.x, p.y - J.y);
+    // hover: shy lean away from a near cursor (no sound, no score)
+    J.hoverLean += (((p.x < J.x ? 1 : -1) * (d < 150 ? (150 - d) / 150 : 0)) - J.hoverLean) * 0.1;
+    if (J.dragging && e.pointerId === J.dragId){
+      // click-and-drag it around: it follows your hand, spins with your
+      // sideways motion, and leaves bubbles behind it
+      var dx = p.x - J.tx, dy = p.y - J.ty;
+      J.moved += Math.hypot(dx, dy);
+      J.rotV += dx * 0.02;                       // sideways drag = spin
+      J.tx = p.x; J.ty = p.y;
+      J.trailAcc += Math.hypot(dx, dy);
+      while (J.trailAcc > 18){ J.trailAcc -= 18; trailBubble(); }
+      // circle-drag twirl: loop all the way around the jelly while held
+      var ang = Math.atan2(p.y - J.y, p.x - J.x);
+      if (J.twirlPrev !== null){
+        var dd = ang - J.twirlPrev;
+        while (dd > Math.PI) dd -= Math.PI * 2;
+        while (dd < -Math.PI) dd += Math.PI * 2;
+        J.twirlAcc += dd;
+        if (!J.twirled && Math.abs(J.twirlAcc) > Math.PI * 2){
+          J.twirled = true;
+          J.rotV += (J.twirlAcc > 0 ? 1 : -1) * 6;
+          ringBurst(); chime();
+          banner.text = 'TWIRL!'; banner.t = 1.6;
+        }
+      }
+      J.twirlPrev = ang;
+    } else if (d < 140){
+      // drag OVER it (no grab): a sweep spins it and pops out bubbles
+      J.sweepAcc += Math.abs(e.movementX || 0) + Math.abs(e.movementY || 0);
+      if (J.sweepAcc > 26){
+        J.sweepAcc = 0;
+        J.rotV += (p.x < J.x ? -1 : 1) * 0.9;
+        sweepBubbles();
+        var now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+        if (now - J.lastSweepSnd > 300){ J.lastSweepSnd = now; tone(900, 1400, 0.09, 'sine', 0.04); }
+      }
+    }
+  });
+  function endDrag(e){
+    if (!J.dragging || (e.pointerId !== undefined && e.pointerId !== J.dragId)) return;
+    J.dragging = false;
+    if (J.moved < 12){
+      // it was a tap, not a drag
+      var p = pos(e);
+      onTap(p.x, p.y);
+    }
+    // else: release keeps the spin — rotV decays on its own in frame()
+  }
+  cv.addEventListener('pointerup', endDrag);
+  cv.addEventListener('pointercancel', endDrag);
+  cv.addEventListener('pointerleave', function(){ hovering = false; mx = -999; });
+
+  var resizeTimer = null;
+  window.addEventListener('resize', function(){
+    if (resizeTimer) clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(fit, 220);
+  });
+
+  // ---- draw: dome + 4 tentacles + dots, plain background ----
+  function draw(){
+    if (!W || !H) return;
+    ctx.clearRect(0, 0, W, H);
+    var bob = Math.sin(J.sway * 0.9) * 6;
+    var pulseSquash = Math.sin(J.pulseT * 6.28) * 0.06;
+    var sy = 1 + J.squash + pulseSquash;
+    var sx = 1 - (J.squash + pulseSquash) * 0.5;
+    var x = J.x + J.hoverLean * 14;
+    var y = J.y + bob;
+
+    if (J.glow > 0){
+      ctx.beginPath(); ctx.arc(x, y, 90 + (1.4 - J.glow) * 40, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(250, 204, 21, ' + (0.25 * J.glow).toFixed(3) + ')';
+      ctx.fill();
+    }
+    // the whole jelly spins together: dome + tentacles rotate as one
+    ctx.save();
+    ctx.translate(x, y); ctx.rotate(J.rot);
+    // tentacles (drawn first, under the dome), lagging behind the motion
+    ctx.strokeStyle = '#f472b6'; ctx.lineWidth = 4; ctx.lineCap = 'round';
+    for (var i = 0; i < 4; i++){
+      var tx = -36 + i * 24;
+      var sway = Math.sin(J.sway * 2 + i * 1.1) * 10 + J.lagX;
+      var len = 62 + (i % 2) * 12;
+      ctx.beginPath();
+      ctx.moveTo(tx, 18);
+      ctx.bezierCurveTo(tx + sway, 30 + len * 0.4, tx - sway, 30 + len * 0.7, tx + sway * 0.5, 30 + len);
+      ctx.stroke();
+    }
+    // dome
+    ctx.save();
+    ctx.scale(sx, sy);
+    ctx.beginPath();
+    ctx.moveTo(-58, 18);
+    ctx.bezierCurveTo(-58, -46, -26, -62, 0, -62);
+    ctx.bezierCurveTo(26, -62, 58, -46, 58, 18);
+    ctx.bezierCurveTo(40, 4, 28, 26, 14, 12);
+    ctx.bezierCurveTo(7, 26, -7, 26, -14, 12);
+    ctx.bezierCurveTo(-28, 26, -40, 4, -58, 18);
+    ctx.closePath();
+    ctx.fillStyle = '#f9a8d4'; ctx.fill();
+    ctx.strokeStyle = '#ec4899'; ctx.lineWidth = 3; ctx.stroke();
+    // two dot eyes + smile
+    ctx.fillStyle = '#831843';
+    ctx.beginPath(); ctx.arc(-18, -18, 5, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(18, -18, 5, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#831843'; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.arc(0, -6, 10, 0.25, Math.PI - 0.25); ctx.stroke();
+    ctx.restore(); ctx.restore();
+    // particles
+    for (var j = 0; j < parts.length; j++){
+      var p = parts[j], a = 1 - p.life / p.max;
+      if (p.kind === 'spark'){
+        ctx.fillStyle = 'rgba(250, 204, 21, ' + a.toFixed(3) + ')';
+        ctx.beginPath(); ctx.arc(p.x, p.y, 4, 0, Math.PI * 2); ctx.fill();
+      } else {
+        ctx.strokeStyle = 'rgba(56, 189, 248, ' + a.toFixed(3) + ')';
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(p.x, p.y, 3 + (1 - a) * 6, 0, Math.PI * 2); ctx.stroke();
+      }
+    }
+    // banner
+    if (banner.t > 0){
+      ctx.font = 'bold 34px system-ui, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillStyle = 'rgba(190, 24, 93, ' + Math.min(1, banner.t).toFixed(3) + ')';
+      ctx.fillText(banner.text, W / 2, 44);
+    }
+  }
+
+  var last = 0;
+  function frame(ts){
+    requestAnimationFrame(frame);   // re-queue first (viewer-safe)
+    var now = ts || 0;
+    var dt = last ? Math.min(0.05, (now - last) / 1000) : 0.016;
+    last = now;
+    J.sway += dt * 2; J.pulseT += dt;
+    if (J.pulseT > 2.6) J.pulseT = 0;
+    var px = J.x, py = J.y;
+    if (J.dragging){
+      // follows your hand with a soft lag; spin keeps turning
+      J.x += (J.tx - J.x) * Math.min(1, dt * 11);
+      J.y += (J.ty - J.y) * Math.min(1, dt * 11);
+      J.rot += J.rotV * dt;
+      J.rotV *= Math.exp(-0.8 * dt);             // slow decay while held
+      // remember the fling: hand velocity at release becomes glide
+      J.gx = (J.x - px) / Math.max(dt, 0.001);
+      J.gy = (J.y - py) / Math.max(dt, 0.001);
+    } else {
+      // spring home to centre stage; leftover spin unwinds gently,
+      // and a fling glides out first, trailing bubbles as it goes
+      var k = 6, c = 3.2;
+      J.vy += (-k * (J.y - J.baseY) - c * J.vy) * dt * 10;
+      J.y += J.vy * dt;
+      J.x += (W / 2 - J.x) * Math.min(1, dt * 2.2);
+      if (Math.hypot(J.gx, J.gy) > 40){
+        J.x += J.gx * dt; J.y += J.gy * dt;
+        J.gx *= Math.exp(-2.2 * dt); J.gy *= Math.exp(-2.2 * dt);
+        J.trailAcc += Math.hypot(J.gx, J.gy) * dt;
+        while (J.trailAcc > 22){ J.trailAcc -= 22; trailBubble(); }
+      } else { J.gx = 0; J.gy = 0; }
+      J.squash += (0 - J.squash) * Math.min(1, dt * 8);
+      J.wob += dt * 10;
+      J.rot += J.rotV * dt;
+      J.rotV += (-4 * J.rot - 3 * J.rotV) * dt;   // spring back to upright
+    }
+    // curious: when the cursor lingers nearby, it drifts a little toward it
+    if (!J.dragging && hovering && mx > -100){
+      var cd = Math.hypot(mx - J.x, my - J.y);
+      if (cd < 220 && cd > 40) J.x += (mx - J.x) * Math.min(1, dt * 0.7);
+    }
+    // tentacles lag behind the motion
+    J.lagX += (((px - J.x) * 0.35) - J.lagX) * Math.min(1, dt * 8);
+    if (J.glow > 0) J.glow -= dt;
+    if (banner.t > 0) banner.t -= dt;
+    for (var i = parts.length - 1; i >= 0; i--){
+      var p = parts[i];
+      p.life += dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vy -= 20 * dt;
+      if (p.life >= p.max) parts.splice(i, 1);
+    }
+    draw();
+  }
+
+  // test hook for the stub-DOM harness
+  window.__jelly = { J: J, parts: parts, banner: banner, tap: onTap, pulse: pulse, egg: egg, fit: fit, size: function(){ return { w: W, h: H }; } };
+
+  fit();
+  setTimeout(fit, 300);
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
